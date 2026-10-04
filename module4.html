@@ -14,300 +14,472 @@
 <div class="layout"><main>
 
 <h1 class="title">Module 4 · Programmable Logic Controllers (PLC)</h1>
-<p class="lead">PLC organisation · hardware (I/O, power supply, CPU) · programming standards · ladder logic (AND, OR, NAND, XOR, latching) · timers and counters · worked ladder exercises.</p>
+<p class="lead">PLC organisation &amp; architecture · Hardware details (CPU, I/O, Power Supply) · IEC 61131-3 standards · Ladder logic (AND, OR, NAND, XOR, latching) · Timers (TON, TOF, RTO) &amp; Counters (CTU, CTD) · Industrial sequencing programs.</p>
 
-<input id="search" class="search" placeholder="Search questions in this module (e.g. timer, ladder, counter, CPU)…">
+<input id="search" class="search" placeholder="Search questions in this module (e.g. timer, ladder, counter, CPU, architecture)…">
 
 <div class="toc"><b>Contents</b>
 <ul>
-<li><a href="#theory">Part 1 – Syllabus theory</a></li>
-<li><a href="#partA">Part 2 – Part A short answers</a></li>
-<li><a href="#partB">Part 3 – Part B long answers</a></li>
+<li><a href="#theory">Part 1 – Syllabus Theory (Simplified)</a></li>
+<li><a href="#partA">Part 2 – Part A Short Answers (3 marks)</a></li>
+<li><a href="#partB">Part 3 – Part B Long Answers (6 – 14 marks)</a></li>
 </ul></div>
 
-<div class="note"><b>Ladder diagram key used on this page:</b> <code>-| |-</code> normally-open (NO) contact / examine-if-closed (XIC) &nbsp;·&nbsp; <code>-|/|-</code> normally-closed (NC) contact / examine-if-open (XIO) &nbsp;·&nbsp; <code>-( )-</code> output coil &nbsp;·&nbsp; <code>-(L)-</code> latch &nbsp;·&nbsp; <code>-(U)-</code> unlatch. The left and right vertical lines are the power rails. A rung conducts when a continuous path of "closed" elements joins the left rail to the output.</div>
+<div class="note">
+<b>⚡ Ladder Logic Symbols Guide:</b><br>
+<code>-| |--</code> Normally-Open Contact (Examine If Closed / XIC) &nbsp;|&nbsp; 
+<code>-|/|--</code> Normally-Closed Contact (Examine If Open / XIO) &nbsp;|&nbsp; 
+<code>--( )--</code> Output Coil (Energise / OTE) &nbsp;|&nbsp; 
+<code>--(L)--</code> / <code>--(U)--</code> Latch / Unlatch Coils.<br>
+Power flows from the <b>Left Rail</b> to the <b>Right Rail</b> whenever an unbroken logical path of closed contacts is present.
+</div>
 
-<h2 id="theory">Part 1 · Syllabus Theory</h2>
+<!-- ===================== THEORY ===================== -->
+<h2 id="theory">Part 1 · Syllabus Theory (Simplified & Clear)</h2>
 
 <div class="topic" id="t-plcintro">
-<h3>4.1 Introduction and organisation of a PLC</h3>
-<p>A <b>programmable logic controller (PLC)</b> is a rugged, special-purpose industrial computer that reads inputs (switches, sensors), executes a user-written control program stored in memory, and sets outputs (motors, valves, lamps) to control a machine or process. PLCs were introduced in 1968 (by General Motors, with Modicon 084) to replace hard-wired relay logic panels. Compared to relay panels, the PLC is smaller, cheaper for large systems, far easier to modify (change the program, not the wiring), more reliable (no moving parts), has self-diagnostics, and can do arithmetic, timing, counting, PID control and communication.</p>
-<p>A PLC is <b>organised</b> as a number of functional blocks connected by internal buses: the <b>CPU</b> (processor and memory), the <b>input/output modules</b>, the <b>power supply</b>, and the <b>programming device</b>. In a modular (rack) PLC, these units are plugged into a backplane; compact PLCs have everything in one box. The CPU communicates with the other units through the <b>data bus</b> (carrying data, 8/16 bits), the <b>address bus</b> (identifying the memory location or I/O address), the <b>control bus</b> (read/write, timing and clock signals) and the <b>system bus</b> (I/O communication).</p>
+<h3>4.1 Introduction & Organisation of a PLC</h3>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> Before PLCs, factories used giant control panels with thousands of mechanical relays wired together like a massive spiderweb. If an engineer wanted to change the machine sequence, technicians spent days rewiring hundreds of cables! A <b>PLC (Programmable Logic Controller)</b> replaces all those hardwired relays with a rugged, microprocessor-based computer. To change the sequence, you simply update the software ladder diagram—zero rewiring needed!
+</div>
+
+<h4>PLC Functional Architecture & Bus Structure</h4>
 <pre class="fig">
-                         +------------------ SYSTEM BUSES (address / data / control) ------------------+
-                         |                                                                            |
- +-----------+    +------+------+    +-----------------------+    +---------------+    +-------------+
- | POWER     |---&gt;|     CPU     |&lt;--&gt;|  MEMORY               |    |  INPUT module |&lt;---| sensors,    |
- | SUPPLY    |    | (processor, |    |  ROM (system program) |    |  (opto-isolated)   | push buttons|
- | 24Vdc/230Vac   |  clock)     |    |  RAM (user program,   |    +---------------+    +-------------+
- +-----------+    +------+------+    |   data, I/O image)    |    +---------------+    +-------------+
-                         ^           +-----------------------+    |  OUTPUT module|---&gt;| motors, coils|
-                         |                                         |  (relay/triac/|    | valves, lamps|
-              +----------+-----------+                             |   transistor) |    +-------------+
-              | PROGRAMMING DEVICE   |                             +---------------+
-              | (PC / handheld)      |
-              +----------------------+
+                                      ADDRESS BUS ===============================================
+                                      DATA BUS    ===============================================
+                                      CONTROL BUS ===============================================
+                                           ||              ||              ||              ||
+ +------------------+               +------++----+  +------++----+  +------++----+  +------++----+
+ | POWER SUPPLY     |-- Supplies -->|    CPU     |  |   MEMORY   |  |   INPUT    |  |   OUTPUT   |
+ | 230Vac -> 24Vdc/ |   All Units   | Processor  |  | ROM (OS)   |  | INTERFACE  |  | INTERFACE  |
+ | 5Vdc (Battery)   |               | & Clock    |  | RAM (Prog) |  | (Opto-Iso) |  | Relay/Triac|
+ +------------------+               +------------+  +------------+  +------+-----+  +------+-----+
+                                           ^                               ^               |
+                                           |                               |               v
+                                  +--------+--------+               Push Buttons /     Contactor Coils,
+                                  | Programming PC  |               Limit Switches     Valves, Motors
+                                  +-----------------+
 </pre>
+
+<h4>The Three Internal Buses</h4>
+<ul>
+<li><b>Address Bus:</b> Carries binary address signals from CPU to specify which memory location or I/O channel is being accessed.</li>
+<li><b>Data Bus:</b> Bi-directional data lines (8, 16, or 32 bits) carrying measurement data and instruction words.</li>
+<li><b>Control Bus:</b> Carries synchronization timing signals (Read/Write pulses, Clock, Interrupts).</li>
+</ul>
+
+<h4>The PLC Scan Cycle</h4>
+<p>Unlike personal computers running hundreds of background apps, a PLC executes a continuous, deterministic 4-step loop:</p>
+<ol>
+<li><b>Input Scan:</b> Reads all physical input terminal states and copies them into the <i>Input Image Table</i> in RAM.</li>
+<li><b>Program Scan:</b> Executes the user ladder program rung-by-rung from top to bottom, evaluating logic using the image table.</li>
+<li><b>Output Scan:</b> Copies the resulting <i>Output Image Table</i> bits to energise physical output terminals.</li>
+<li><b>Housekeeping & Diagnostics:</b> Performs self-diagnostics, communications with programming PC/HMI, and resets the watchdog timer.</li>
+</ol>
+<p>Total scan time is typically $1\text{ to }20\text{ milliseconds}$.</p>
 </div>
 
 <div class="topic" id="t-hardware">
-<h3>4.2 Hardware details – I/O, power supply and CPU</h3>
-<h4>Central processing unit (CPU)</h4>
-<p>The CPU is the "brain" of the PLC. It consists of the microprocessor (with ALU and registers), the system clock, and the memory. It performs: (i) <b>fetching and executing</b> the user program, (ii) reading the input states and writing outputs, (iii) arithmetic, logic, timing, counting and data-handling operations, (iv) <b>communication</b> with the programming device, HMI and other PLCs over serial/Ethernet links, and (v) <b>self-diagnostics</b> and watchdog monitoring – a watchdog timer resets the CPU if the scan takes too long. The CPU works in the repeated <b>scan cycle</b>: <i>input scan</i> (copy the inputs into the input image table) → <i>program scan</i> (execute the ladder from the first to the last rung, using the image table) → <i>output scan</i> (copy the output image table to the output modules) → <i>housekeeping</i> (communications, diagnostics). The scan time is of the order of 1–100 ms and determines the response speed. Memory comprises <b>ROM/EPROM</b> for the operating system (executive), <b>RAM</b> (battery backed) for user program and data, and <b>EEPROM/Flash</b> for program backup.</p>
-<h4>Input/output (I/O) modules</h4>
-<p>I/O modules connect the field devices to the CPU and also condition the signals. <b>Input modules</b> accept discrete signals (24 Vdc, 120/230 Vac) or analog signals (4–20 mA, 0–10 V, thermocouple/RTD) and, using <b>opto-isolators</b>, convert them to the logic level (5 V) of the CPU while separating the electronics from field voltages and noise. <b>Output modules</b> drive the loads: <i>relay outputs</i> (any load AC/DC, slow, 2 A, contacts wear), <i>transistor outputs</i> (DC only, fast, long life) and <i>triac outputs</i> (AC loads, no moving parts), also isolated optically. Analog outputs (4–20 mA, 0–10 V) are provided through D/A converters, and special modules exist for high-speed counting, positioning, PID and communication. Each I/O point has a unique <b>address</b> and indicator LED.</p>
-<h4>Power supply</h4>
-<p>The power supply converts the mains (230 V AC, or 24 V DC) to the DC levels (5 V, 12 V, 24 V) required by the CPU and I/O modules, regulated and with protection against surges, brown-outs and noise. It also supplies a battery back-up for RAM and the real-time clock. Its importance is in giving a clean, stable supply so that the CPU operates reliably, the program memory is not lost on power failure, and fluctuations do not cause false operation. The field devices are often powered from a separate 24 V DC supply.</p>
+<h3>4.2 Hardware Details: CPU, I/O Modules & Power Supply</h3>
+
+<h4>1. Central Processing Unit (CPU)</h4>
+<p>The "brain" containing the microprocessor, math ALU, registers, and memory. Performs program fetching, execution, mathematical calculations, timers/counters, and communications. Memory includes:</p>
+<ul>
+<li><b>ROM (Read-Only Memory):</b> Stores permanent operating system (executive firmware) burned in by manufacturer.</li>
+<li><b>RAM (Random Access Memory):</b> Fast memory holding user ladder logic, timer accumulators, and I/O image tables. Backed up by a lithium battery to prevent memory loss during power cuts.</li>
+<li><b>EEPROM / Flash Memory:</b> Non-volatile backup storage of user programs.</li>
+</ul>
+
+<h4>2. Input/Output Modules</h4>
+<p>Provides galvanic safety and electrical interfacing between delicate $5\text{ V}$ processor chips and rugged $230\text{ V AC} / 24\text{ V DC}$ factory machinery:</p>
+<ul>
+<li><b>Input Modules:</b> Use <b>opto-isolators</b> (LED + phototransistor) to convert noisy field voltages into clean logic levels while blocking high-voltage surges.</li>
+<li><b>Output Modules:</b>
+  <ul>
+    <li><b>Relay Outputs:</b> Mechanical contacts; switches both AC and DC loads up to $2\text{ A}$; slow switching speed, limited contact lifespan.</li>
+    <li><b>Transistor Outputs:</b> Solid-state (NPN/PNP); switches DC loads only; ultra-fast switching, practically infinite lifetime.</li>
+    <li><b>Triac Outputs:</b> Solid-state; switches AC loads only; zero-crossing switching, ideal for AC solenoids.</li>
+  </ul>
+</li>
+</ul>
+
+<h4>3. Power Supply Unit</h4>
+<p>Converts incoming AC mains ($230\text{ V AC}$) into regulated DC voltages ($+5\text{ V}$ for processor logic, $+24\text{ V}$ for field I/O). Includes surge suppression, electromagnetic filtering, and hold-up capacitors that provide $20\text{–}50\text{ ms}$ of backup power during sudden voltage dips so the CPU can execute an orderly shutdown.</p>
 </div>
 
-<div class="topic" id="t-std">
-<h3>4.3 Programming standards and aspects</h3>
-<p>The international standard <b>IEC 61131-3</b> defines five PLC programming languages so that programs are portable between vendors: <b>Ladder Diagram (LD)</b> – graphical, resembling relay circuits; <b>Function Block Diagram (FBD)</b> – graphical blocks connected by signal lines; <b>Structured Text (ST)</b> – high-level, Pascal-like; <b>Instruction List (IL)</b> – low-level assembler-like (mnemonics such as LD, AND, OR, ST); and <b>Sequential Function Chart (SFC)</b> – step/transition chart for sequential processes. Ladder logic is the most popular since electricians can understand it easily.</p>
-<h4>Ladder programming basics</h4>
-<p>A <b>ladder diagram</b> has two vertical <b>rails</b> (power rails, representing the supply lines: left rail is the live, right rail is neutral/0 V) and <b>rungs</b> between them which are horizontal lines carrying the logic. Each rung contains <b>inputs</b> (contacts) at the left (examining bits in the memory) and an <b>output</b> (coil) at the right. Series elements represent AND, parallel branches represent OR. Contacts are <i>input elements</i> (instructions that test the status of a bit: XIC or XIO) and coils are <i>output elements</i> (instructions that set a bit: OTE, OTL, OTU) – and timers, counters and math blocks are also placed in the rung as output-type instructions.</p>
-<pre class="fig">
- L1 |                                                 | L2
-    |   Start PB       Stop PB        Motor           |
-    |----| |------------|/|------------( )-----------|     &lt;-- Rung 1 : series = AND
-    |    I:0/0          I:0/1          O:0/0          |
-    |                                                 |
-    |   Sensor A                       Lamp           |
-    |----| |---+-----------------------( )-----------|     &lt;-- Rung 2 : parallel = OR
-    |    I:0/2 |                        O:0/1         |
-    |   Sensor B                                      |
-    |----| |---'                                      |
-    |    I:0/3                                        |
-</pre>
+<div class="topic" id="t-ladder">
+<h3>4.3 Ladder Logic Fundamentals & Realisation of Logic Gates</h3>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> 
+<ul>
+<li><b>Series Contacts = AND:</b> Both switch A <b>AND</b> switch B must be closed to complete the electrical path.</li>
+<li><b>Parallel Contacts = OR:</b> Either switch A <b>OR</b> switch B can complete the electrical path.</li>
+<li><b>Normally-Closed Contact = NOT:</b> Current flows when the input is OFF; opening the input cuts power.</li>
+</ul>
 </div>
 
-<div class="topic" id="t-logic">
-<h3>4.4 Realisation of logic gates – AND, OR, NAND, XOR and latching</h3>
-<p><b>AND:</b> two NO contacts in <i>series</i>. The output is on only if both A and B are on. <b>OR:</b> two NO contacts in <i>parallel</i>. The output is on if either is on. <b>NOT:</b> a single NC contact. <b>NAND:</b> output is OFF only if both inputs are ON, i.e. $Y=\overline{A\cdot B}=\bar A+\bar B$ → two NC contacts in parallel. <b>NOR:</b> $Y=\overline{A+B}=\bar A\cdot\bar B$ → two NC contacts in series. <b>XOR:</b> $Y=A\bar B+\bar A B$ → two series pairs (A with NC B, NC A with B) in parallel.</p>
 <pre class="fig">
- AND                          OR                            NOT
- |--| |--| |-----( )--|       |--+--| |--+-----( )--|       |---|/|----( )--|
-    A    B       Y            |  A       |       Y          |   A         Y
-                              |--+--| |--'                  
-                                 B
- NAND   Y = NOT(A AND B)                        XOR   Y = A.B' + A'.B
- |--+--|/|--+------( )--|                       |--+--| |--|/|--+------( )--|
- |  A       |        Y                          |  A    B       |        Y
- |--+--|/|--'                                   |--+--|/|--| |--'
-    B                                              A'   B
+ 1. AND Gate : Y = A . B                           2. OR Gate : Y = A + B
+ |--| |--| |-----------------( )--|                |--+--| |--+----------------( )--|
+    A    B                    Y                    |  A       |                 Y
+                                                   |--+--| |--'
+                                                      B
+
+ 3. NAND Gate : Y = NOT(A . B) = A' + B'           4. XOR Gate : Y = A.B' + A'.B
+ |--+--|/|--+----------------( )--|                |--+--| |--|/|--+-----------( )--|
+ |  A'      |                 Y                    |  A    B'      |            Y
+ |--+--|/|--'                                      |--+--|/|--| |--'
+    B'                                                A'   B
 </pre>
-<h4>The concept of latching (seal-in)</h4>
-<p>A momentary push button should start a motor that then keeps running after the button is released. This <b>latching</b> (holding or sealing) is obtained by using the output's own contact in parallel with the start push-button: once the output turns on, its contact closes and provides an alternative path (a "hold-in" circuit), so the output remains energised even when the Start input opens. The Stop button is a NC contact in series that breaks the path and "unlatches" the output. Alternatively, the <b>set (latch, OTL)</b> and <b>reset (unlatch, OTU)</b> instructions can be used; latched outputs are retained even after power failure in some PLCs, which is important for safety.</p>
+
+<h4>The Concept of Latching (Seal-In Circuit)</h4>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> A start pushbutton only stays pressed as long as your finger is on it. When you let go, it springs back open. A <b>seal-in latch</b> connects an auxiliary contact of the motor itself in parallel with the start button. Once the motor turns ON, its own contact closes and "seals" power to itself—allowing the motor to keep running forever until you press the STOP button!
+</div>
+
 <pre class="fig">
- |--+--| |--+--|/|----------( )--|
- |  Start   |  Stop          Motor        Start = I:0/0 (NO), Stop = I:0/1 (NC wired),
- |  |        |                            Motor = O:0/0
+  Start PB (NO)       Stop PB (NC)         Motor Output Coil
+ |--+--| |--+-------------|/|---------------------( )---|
+ |  I0.0    |             I0.1                    Q0.0
+ |          |
  |--+--| |--'
-    Motor (seal-in contact)
+    Q0.0 (Seal-in auxiliary contact of Motor)
 </pre>
 </div>
 
 <div class="topic" id="t-timers">
-<h3>4.5 Timers and counters</h3>
-<p><b>Timers.</b> A PLC timer is an internal software instruction replacing a hardware time-delay relay. It has a <b>time base</b> (0.001, 0.01, 0.1 or 1 s), a <b>preset value (PRE/PV)</b> – the number of time-base intervals to be counted, an <b>accumulated value (ACC)</b> – the elapsed time since the timer was last reset, which is updated continuously while the timer is enabled, and status bits: <b>enable (EN)</b>, <b>timer timing (TT)</b> and <b>done (DN)</b>, which is set when ACC reaches PRE. The delay time is $T = \text{PRE}\times\text{time base}$ (e.g. PRE = 1000 with time base 0.1 s gives 100 s). Types: <b>TON</b> – on-delay: starts timing when the rung becomes true and the output goes on after the preset time, and resets when the rung goes false; <b>TOF</b> – off-delay: output goes on immediately and stays on for the preset time after the rung goes false; <b>RTO</b> (retentive) – keeps its accumulated value when the rung becomes false and must be reset with a separate RES instruction; the <b>pulse timer</b> gives a fixed-length output pulse.</p>
-<pre class="fig">
- TON timer example  (delay of 10 s with 0.1 s base: PRE = 100)
- |--| |-----------------------[ TON  T4:0   Base 0.1   PRE 100  ACC 0 ]--(EN)(DN)--|
- |  I:0/0 (enable)
- |--| |---T4:0/DN-----------------------------------------------------( )----------|
-                                                                       O:0/0  (turns on 10 s after I:0/0 closes)
-</pre>
-<p><b>Counters.</b> A counter counts the number of transitions (events) of a input contact (false→true), such as the number of items passing a sensor. Parameters: <b>preset (PRE)</b>, <b>accumulated (ACC)</b> and bits: <b>CU/CD</b> (count up/down enable), <b>DN</b> (done: ACC ≥ PRE), <b>OV/UN</b> (overflow/underflow). <b>CTU</b> counts up on every rising edge, <b>CTD</b> counts down, and <b>CTUD</b> does both. A counter retains its value even when the rung goes false, and so it must be cleared with a separate <b>RES (reset)</b> instruction. Counting is done by software on the sensor signal, so it is more reliable and accurate than mechanical counters, and each cycle is detected only once per scan (the maximum count rate is limited by scan time; high-speed counter modules are used above that).</p>
-<h4>Significance of timers and counters</h4>
-<p>Timers provide time-based control: delays, sequential start-up, flashing lamps, motor run-on, and cycle timing. Counters give event-based control: counting parts, batching, tracking positions and limiting the number of operations. Together they permit sequential control of complex processes and they are far more flexible than hardware timer relays and counters because the preset can be changed in software and they give multiple contacts for free.</p>
+<h3>4.4 PLC Timers and Counters</h3>
+
+<h4>1. Timers</h4>
+<p>Internal software instructions replacing mechanical timing relays. A timer has three key words:</p>
+<ul>
+<li><b>Preset Value (PRE):</b> The target time count to reach.</li>
+<li><b>Accumulated Value (ACC):</b> The elapsed time counted so far (resets to 0 when disabled).</li>
+<li><b>Time Base:</b> Duration of each tick ($0.01\text{ s}, 0.1\text{ s}, 1.0\text{ s}$). Total Delay $= \text{PRE} \times \text{Time Base}$.</li>
+<li><b>Bits:</b> <b>EN</b> (Timer Enabled), <b>TT</b> (Timer Timing), <b>DN</b> (Done bit—sets TRUE when $\text{ACC} \ge \text{PRE}$).</li>
+</ul>
+<table>
+<tr><th>Timer Type</th><th>Behavior When Rung Becomes TRUE</th><th>Behavior When Rung Goes FALSE</th></tr>
+<tr><td><b>TON (On-Delay)</b></td><td>Starts timing. DN bit turns ON <i>after</i> delay.</td><td>Resets immediately ($\text{ACC} = 0$, $\text{DN} = 0$).</td></tr>
+<tr><td><b>TOF (Off-Delay)</b></td><td>DN bit turns ON immediately.</td><td>Starts timing. DN stays ON for delay duration, then turns OFF.</td></tr>
+<tr><td><b>RTO (Retentive)</b></td><td>Starts timing like TON.</td><td><b>Retains</b> accumulated value! Only resets via explicit <b>RES</b> instruction.</td></tr>
+</table>
+
+<h4>2. Counters</h4>
+<p>Counts false-to-true (0 to 1) transitions of an input sensor (e.g., photo-eye detecting passing boxes).</p>
+<ul>
+<li><b>CTU (Count-Up):</b> Increments $\text{ACC}$ by 1 on each pulse edge. Sets $\text{DN}$ bit when $\text{ACC} \ge \text{PRE}$.</li>
+<li><b>CTD (Count-Down):</b> Decrements $\text{ACC}$ by 1 on each pulse edge.</li>
+<li><b>CTUD (Up/Down):</b> Tracks net inventory (e.g., parking garage cars entering vs exiting).</li>
+<li><b>RES (Reset Instruction):</b> Counters do NOT reset when input drops. A separate rung with a <b>[RES]</b> instruction resets $\text{ACC} = 0$.</li>
+</ul>
 </div>
 
+<!-- ===================== PART A ===================== -->
 <h2 id="partA">Part 2 · Part A – Short Answers (3 marks)</h2>
 
-<div class="qa a" id="a4-1"><div class="qhead"><h3>Implement two-input AND and OR gate operations using PLC ladder logic.</h3><span class="marks">3 marks</span></div>
-<div class="tags"><span class="tag">May 2024 · Q7</span><span class="tag">Apr 2025 · Q18(a) (8 marks)</span><span class="tag syl">Model Q7</span></div>
+<div class="qa a" id="a4-1">
+<div class="qhead"><h3>Implement two-input AND and OR gate operations using PLC ladder logic.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q7</span><span class="tag">Apr 2025 · Q18(a)</span><span class="tag syl">Model Paper Q7</span></div>
 <pre class="fig">
- AND gate : Y = A . B                           OR gate : Y = A + B
- |----| |------| |--------( )---|              |---+----| |----+--------( )---|
-      I0.0     I0.1       Q0.0                    | I0.0        |         Q0.0
-      (A)      (B)        (Y)                     +----| |-----'
-                                                    I0.1
- Truth table:                                  A B | AND OR
-  A B | AND                                    0 0 |  0   0
-  0 0 |  0   (A and B in series: both must     0 1 |  0   1
-  0 1 |  0    be closed for the coil to energise)1 0 |  0   1
-  1 0 |  0                                     1 1 |  1   1
-  1 1 |  1
+ AND Gate : Q0.0 = I0.0 . I0.1                     OR Gate : Q0.1 = I0.0 + I0.1
+ |--| |--| |------------------( )--|               |--+--| |--+-----------------( )--|
+    I0.0  I0.1                Q0.0                 |  I0.0    |                 Q0.1
+    (A)   (B)                 (Y)                  |--+--| |--'
+                                                      I0.1
+ Truth Table:                                      Truth Table:
+  I0.0  I0.1 | Q0.0                                 I0.0  I0.1 | Q0.1
+   0     0   |  0                                    0     0   |  0
+   0     1   |  0                                    0     1   |  1
+   1     0   |  0                                    1     0   |  1
+   1     1   |  1                                    1     1   |  1
 </pre>
-<p>In an AND gate the two normally-open contacts A and B are connected in <b>series</b>: the coil Y is energised only when both A and B are true. In an OR gate the two contacts are connected in <b>parallel</b>: if either A or B is true there is a path to the coil. The same combination can be programmed as the Boolean statement $Y=A\cdot B$ or $Y=A+B$.</p></div>
+<p><b>Explanation:</b> AND logic connects normally-open contacts in <b>series</b> (both must be closed for output to energise). OR logic connects contacts in <b>parallel</b> (closing either path energises the output).</p>
+</div>
 
-<div class="qa a" id="a4-2"><div class="qhead"><h3>What is ladder programming? / Explain the elements of a ladder diagram / input and output elements.</h3><span class="marks">3 marks</span></div>
+<div class="qa a" id="a4-2">
+<div class="qhead"><h3>Explain PLC ladder programming / input elements and output elements.</h3><span class="marks">3 marks</span></div>
 <div class="tags"><span class="tag">Jun 2023 · Q8</span><span class="tag">May 2024 · Q8</span><span class="tag">Apr 2025 · Q8</span><span class="tag">Apr 2026 · Q7</span></div>
-<p>Ladder programming is a graphical PLC language (LD in IEC 61131-3) that resembles the relay ladder wiring diagram, and is named so because the diagram looks like a ladder. Its elements are: <b>(1) Rails</b> – two vertical lines on left and right giving the power flow to the logic; <b>(2) Rungs</b> – horizontal lines between the rails, each rung containing one logical operation (one or more input conditions and an output); <b>(3) Branches</b> – parallel paths in a rung representing OR logic; <b>(4) Inputs (input elements)</b> – contacts, normally open (XIC) or normally closed (XIO), which examine the status of physical input devices (push buttons, limit switches, sensors) or internal bits; <b>(5) Outputs (output elements)</b> – coils that drive physical outputs (motor starters, lamps, solenoids) or internal bits; <b>(6) Timers/counters</b> and functional blocks. A rung is solved from left to right; if there is a continuous logical path ("power flow") the output is energised. Sample program (start/stop motor):</p>
-<pre class="fig">
- |--+--| |--+--|/|----( )--|     Start (I0.0) with seal-in contact of Motor (Q0.0),
- |  Start   |  Stop    Motor     Stop (I0.1) in series breaks the circuit.
- |--+--| |--'
-    Motor
-</pre></div>
+<p><b>Ladder Programming (LD):</b> A graphical programming language standardised under IEC 61131-3 that mimics electromechanical relay schematic diagrams. It consists of vertical power rails and horizontal rungs evaluated from left to right, top to bottom.</p>
+<ul>
+<li><b>Input Elements (Contacts):</b> Instructions that examine memory bits:
+  <ul>
+    <li><code>-| |--</code> <b>XIC (Examine If Closed):</b> Evaluates TRUE if bit is 1 (normally-open contact).</li>
+    <li><code>-|/|--</code> <b>XIO (Examine If Open):</b> Evaluates TRUE if bit is 0 (normally-closed contact).</li>
+  </ul>
+</li>
+<li><b>Output Elements (Coils):</b> Instructions that control memory bits:
+  <ul>
+    <li><code>--( )--</code> <b>OTE (Output Energise):</b> Sets bit to 1 if rung logic is true; 0 if false.</li>
+    <li><code>--(L)--</code> / <code>--(U)--</code> <b>OTL / OTU:</b> Retentive Latch and Unlatch instructions.</li>
+  </ul>
+</li>
+</ul>
+</div>
 
-<div class="qa a" id="a4-3"><div class="qhead"><h3>Give the significance of timers and counters in PLC.</h3><span class="marks">3 marks</span></div>
-<div class="tags"><span class="tag">Jun 2023 · Q7</span><span class="tag">Apr 2026 · Q8 (counters)</span></div>
-<p><b>Timers</b> provide a variety of time bases (usually 0.01 s, 0.1 s and 1 s). Each timer has an <b>accumulated value (ACC)</b>, which is the time elapsed since the timer was last reset, and which is updated continuously when the timer is enabled, and a <b>preset value (PRE)</b>, which specifies the value that the timer must reach before the controller sets the <b>done bit</b>. Timers give delays, sequencing and timing of process operations. A <b>counter</b> uses a sensor signal to count operations or events (objects, revolutions), which is processed by software in the PLC; thus failure rate is reduced and accuracy is increased compared with hardware counters. Counters (CTU, CTD) set a done bit when the count reaches the preset and are used for batching, packaging, inventory and limit control. The major difference is that a timer continuously increments its accumulated value at a rate fixed by the time base while the enable contact is on, whereas the counter increments only on each false-to-true transition of its input.</p></div>
+<div class="qa a" id="a4-3">
+<div class="qhead"><h3>Give the significance of timers and counters in a PLC.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q7</span><span class="tag">Apr 2026 · Q8</span></div>
+<p><b>Significance:</b> Replaces fragile, expensive electromechanical timing relays and mechanical revolution counters with flexible, high-precision software blocks.</p>
+<ol>
+<li><b>Timers:</b> Provide programmable delays, sequence timing, and flashing alarms based on internal clock time bases ($0.01\text{ s}, 0.1\text{ s}, 1\text{ s}$). Continually increments accumulator ACC while enabled until preset PRE is reached.</li>
+<li><b>Counters:</b> Count discrete events (products passing photo-sensors, motor rotations). Increments accumulator ACC only on false-to-true rising edges. Eliminates mechanical wear, never loses calibration, and resets instantly via software.</li>
+</ol>
+</div>
 
-<div class="qa a" id="a4-4"><div class="qhead"><h3>Discuss latching in PLC.</h3><span class="marks">3 marks</span></div>
+<div class="qa a" id="a4-4">
+<div class="qhead"><h3>Discuss latching in PLC.</h3><span class="marks">3 marks</span></div>
 <div class="tags"><span class="tag">Apr 2025 · Q7</span></div>
-<p>Latching is a program technique by which an output, once switched on by a momentary input (e.g. a Start push-button), stays on after the input is released, until a separate reset or stop action. It is accomplished by connecting a normally-open contact of the <i>output itself</i> in parallel with the start contact (a seal-in or holding contact) while a normally-closed stop contact is connected in series in the rung. When Start is pressed, the output energises and its own contact closes, thereby providing a parallel path; releasing Start does not open the circuit. Pressing Stop opens the path, and the output drops off, and also the seal-in contact opens. Alternatively, the OTL (latch/set) and OTU (unlatch/reset) instructions can be used. Latching is used for motor start–stop circuits, alarms (latched until acknowledged) and for holding conditions in sequences.</p></div>
+<p>Latching is a ladder logic circuit where an output coil keeps itself energised even after the initiating input signal turns OFF. A normally-open contact of the output coil is wired in <b>parallel</b> with the momentary Start pushbutton (seal-in contact), while a normally-closed Stop contact is wired in series. When Start is pressed, the output turns ON, closing its own auxiliary contact to maintain power. Pressing Stop breaks the circuit and unlatches the output.</p>
+</div>
 
-<h2 id="partB">Part 3 · Part B – Long Answers</h2>
+<!-- ===================== PART B ===================== -->
+<h2 id="partB">Part 3 · Part B – Long Answers (6 – 14 marks)</h2>
 
-<div class="qa" id="b4-1"><div class="qhead"><h3>Q. Draw the block diagram of a PLC showing the main functional items and how buses link them; explain the function of each block.</h3><span class="marks">8 – 14 marks</span></div>
-<div class="tags"><span class="tag">May 2024 · Q17(b) (8)</span><span class="tag">Apr 2025 · Q17(a) (8)</span><span class="tag">Apr 2026 · Q17(a) (10)</span><span class="tag syl">Model Q18 (14)</span></div>
+<div class="qa" id="b4-1">
+<div class="qhead"><h3>Q. Draw the block diagram architecture of a PLC and explain its different sub-components and linking buses.</h3><span class="marks">8 – 14 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q17(b)</span><span class="tag">Apr 2025 · Q17(a)</span><span class="tag">Apr 2026 · Q17(a)</span><span class="tag syl">Model Paper Q18</span></div>
+
+<h4>1. Architectural Block Diagram</h4>
 <pre class="fig">
-                                ADDRESS BUS  ================================================
-                                DATA BUS     ================================================
-                                CONTROL BUS  ================================================
-                                    ||               ||                 ||              ||
- +-----------+               +------++----+   +-----++-----+   +------++------+   +----++------+
- | POWER     |-- supplies --&gt;|    CPU      |   |  MEMORY    |   |  INPUT       |   |  OUTPUT     |
- | SUPPLY    |   all units   | (Processor, |   | ROM  | RAM |   |  INTERFACE   |   |  INTERFACE  |
- | (battery  |               |  clock)     |   |      |     |   |  (opto-isol.)|   | (relay/trans|
- |  backup)  |               +-------------+   +------------+   +------+-------+   +------+------+
- +-----------+                      ^                                  ^                  |
-                                    |                                  |                  v
-                           +--------+--------+                   Sensors / switches    Actuators, motors,
-                           | Programming unit|                   push buttons          valves, lamps
-                           | + Comm. interface|
-                           +-----------------+
+                                       ADDRESS BUS  ==============================================
+                                       DATA BUS     ==============================================
+                                       CONTROL BUS  ==============================================
+                                           ||              ||              ||              ||
+ +------------------+               +------++----+  +------++----+  +------++----+  +------++----+
+ | POWER SUPPLY     |-- Supplies -->|    CPU     |  |   MEMORY   |  |   INPUT    |  |   OUTPUT   |
+ | 230Vac Mains ->  |   All Units   | Processor  |  | ROM (OS)   |  | INTERFACE  |  | INTERFACE  |
+ | 24Vdc & 5Vdc     |               | & Clock    |  | RAM (User) |  | (Opto-Iso) |  | Relays/Semi|
+ +------------------+               +------------+  +------------+  +------+-----+  +------+-----+
+                                           ^                               ^               |
+                                           |                               |               v
+                                  +--------+--------+               Sensors, Limit     Contactor Coils,
+                                  | Programming PC  |               Switches, Trans.   Valves, Solenoids
+                                  +-----------------+
 </pre>
-<p><b>1. Central processing unit (CPU).</b> The CPU contains the microprocessor which executes the program stored in the memory, controls all activities in the PLC, performs the logical and arithmetic operations, and carries out the scan cycle of reading the inputs, solving the program and updating the outputs. It includes a clock, which sets the timing of operations, and carries out diagnostics.</p>
-<p><b>2. Memory.</b> <b>ROM</b> holds the permanent operating system (monitor/executive) and cannot be changed by the user. <b>RAM</b> (with battery backup) holds the user program, the data (timer and counter values, internal relays), and the input/output image tables. <b>EPROM/EEPROM/Flash</b> store the program permanently or for backup.</p>
-<p><b>3. Input interface (module).</b> Connects the field input devices – push-buttons, limit switches, proximity sensors, analog transmitters – to the CPU. It converts the field signals (24 V DC/120 V AC/4–20 mA) into the logic level (5 V) and provides <b>optical isolation</b> to protect the CPU from voltage spikes and noise, and also performs filtering.</p>
-<p><b>4. Output interface (module).</b> Gets the CPU's decisions to the actuators – contactor coils, solenoids, lamps, valves – via relays, transistors or triacs, while giving electrical isolation. Analog outputs come through D/A converters.</p>
-<p><b>5. Power supply.</b> Converts the AC mains to the DC voltages required by the processor and the I/O modules and provides regulated, filtered power, and battery back-up.</p>
-<p><b>6. Programming device and communication interface.</b> A PC or handheld programmer is used to enter, edit, monitor and debug the ladder program, which is then downloaded to the PLC memory. The communication ports (RS-232/485, Ethernet, Profibus) connect the PLC to HMIs, SCADA and other PLCs.</p>
-<p><b>Buses.</b> The units are linked with three sets of parallel lines: the <b>address bus</b> (carries the address of the memory location or I/O channel to be accessed, e.g. 16 lines allow 64 K locations), the <b>data bus</b> (carries the data being transferred, 8/16/32 bit) and the <b>control bus</b> (carries the control signals – read, write, clock, interrupt – that synchronise the operation). A <b>system bus</b> is used for I/O communication. The CPU is the bus master.</p></div>
 
-<div class="qa" id="b4-2"><div class="qhead"><h3>Q. Compare a programmable logic controller with a personal computer.</h3><span class="marks">4 marks</span></div>
+<h4>2. Detailed Explanation of Sub-Components</h4>
+<ol>
+<li><b>Central Processing Unit (CPU):</b> Contains the microprocessor that fetches, decodes, and executes ladder instructions. Manages the continuous <i>Scan Cycle</i> (Input read $\to$ Logic solve $\to$ Output update). Includes a quartz clock for internal timing and a hardware <b>watchdog timer</b> that trips the system safely if software hangs.</li>
+<li><b>Memory System:</b>
+  <ul>
+    <li><b>System ROM:</b> Permanent operating system and firmware written by manufacturer.</li>
+    <li><b>User RAM:</b> Holds user ladder logic, timer/counter presets, and dynamic I/O image tables. Protected by battery backup.</li>
+    <li><b>Flash EEPROM:</b> Non-volatile backup storage of the program.</li>
+  </ul>
+</li>
+<li><b>Input Interface Module:</b> Connects field input devices ($24\text{ V DC}, 230\text{ V AC}$) to delicate internal $5\text{ V}$ CPU logic. Contains <b>opto-isolators</b> (LED + phototransistor) that provide electrical barrier isolation ($1.5\text{–}3\text{ kV}$) to protect the CPU against field spikes.</li>
+<li><b>Output Interface Module:</b> Transmits CPU decisions to field actuators. Available as dry relay contacts (AC/DC, $2\text{ A}$), high-speed transistors (DC only), or triacs (AC only).</li>
+<li><b>Power Supply Module:</b> Converts noisy AC mains into precision regulated DC voltages ($+5\text{ V}$ logic, $+24\text{ V}$ sensor power). Includes EMI line filters, surge arrestors, and brownout hold-up capacitors.</li>
+<li><b>Programming Device & Communication Interface:</b> PC running engineering software connected via Ethernet, USB, or RS-485 to download, monitor, and debug ladder rungs live.</li>
+</ol>
+
+<h4>3. The Interconnecting Buses</h4>
+<ul>
+<li><b>Address Bus:</b> Unidirectional lines determining which memory byte or I/O slot the CPU is reading/writing.</li>
+<li><b>Data Bus:</b> Bidirectional parallel lines transferring instruction words and measurement values between blocks.</li>
+<li><b>Control Bus:</b> Timing lines carrying Read/Write strobe signals, system clock, and hardware interrupt lines.</li>
+</ul>
+</div>
+
+<div class="qa" id="b4-2">
+<div class="qhead"><h3>Q. Compare a Programmable Logic Controller (PLC) with a Personal Computer (PC).</h3><span class="marks">4 marks</span></div>
 <div class="tags"><span class="tag">Apr 2026 · Q17(b)</span></div>
-<p>Both contain a processor, memory and I/O, but a PLC is designed specifically for control in harsh industrial environments, whereas a PC is a general-purpose computing machine intended for office and home use.</p>
 <table>
-<tr><th>Point</th><th>PLC</th><th>Personal computer</th></tr>
-<tr><td>Purpose</td><td>Real-time control of machines and processes</td><td>General data processing, office and multimedia applications</td></tr>
-<tr><td>Environment</td><td>Rugged: withstands heat, dust, humidity, vibration and electrical noise</td><td>Needs a clean, air-conditioned environment</td></tr>
-<tr><td>I/O</td><td>Built-in, optically isolated industrial I/O at 24 V/230 V and analog 4–20 mA</td><td>No direct industrial I/O; needs interface cards and signal conditioning</td></tr>
-<tr><td>Operating system</td><td>Real-time executive; deterministic scan cycle</td><td>Windows/Linux – non-deterministic timing, may crash or reboot</td></tr>
-<tr><td>Programming</td><td>Ladder logic (IEC 61131-3) – easy for technicians</td><td>High-level languages: C, Python, Java</td></tr>
-<tr><td>Reliability / MTBF</td><td>Very high; designed for continuous 24 × 7 operation</td><td>Lower; hard disk and fans fail</td></tr>
-<tr><td>Cost</td><td>Higher per unit of computing power</td><td>Cheaper, more computing power and storage</td></tr>
-<tr><td>Maintenance</td><td>Modular, hot-swappable, diagnostics</td><td>Repair needs a technician; software updates risk</td></tr>
-<tr><td>Typical use</td><td>Automation of assembly lines, process control</td><td>HMI/SCADA front-ends, engineering station, data analysis</td></tr></table></div>
+<tr><th>Feature</th><th>Programmable Logic Controller (PLC)</th><th>Personal Computer (PC)</th></tr>
+<tr><td><b>Operating Environment</b></td><td>Designed for harsh factory floors: withstands vibration, dust, extreme heat ($-10\text{ to }60^\circ\text{C}$), and high EMI noise.</td><td>Office grade: sensitive to dust, vibration, moisture, and temperature fluctuations.</td></tr>
+<tr><td><b>Operating System & Determinism</b></td><td><b>Deterministic Real-Time OS:</b> Guarantees fixed, predictable scan time ($1\text{–}10\text{ ms}$). Never crashes.</td><td>Non-deterministic OS (Windows): background tasks cause unpredictable latency; prone to crashes and reboots.</td></tr>
+<tr><td><b>Industrial I/O</b></td><td>Built-in, optically isolated industrial I/O terminals ($24\text{ V DC}, 230\text{ V AC}$) with diagnostic LEDs.</td><td>No direct industrial I/O; requires costly third-party external interface cards.</td></tr>
+<tr><td><b>Programming Language</b></td><td>Standardized industrial languages (IEC 61131-3 Ladder Logic) easily maintained by plant electricians.</td><td>High-level languages (C++, Python, Java) requiring trained software programmers.</td></tr>
+<tr><td><b>Reliability & MTBF</b></td><td>Extremely high Mean Time Between Failures ($>100,000\text{ hours}$); solid-state, fanless design.</td><td>Lower reliability due to moving cooling fans, hard drives, and OS updates.</td></tr>
+</table>
+</div>
 
-<div class="qa" id="b4-3"><div class="qhead"><h3>Q. Importance of the power supply in a PLC and importance of the CPU in a PLC.</h3><span class="marks">6 marks each</span></div>
-<div class="tags"><span class="tag">Jun 2023 · Q17(b) (power supply)</span><span class="tag">Jun 2023 · Q18(b) (CPU)</span></div>
-<h4>(a) Importance of the power supply</h4>
-<p>The PLC power supply converts the incoming 230 V/110 V AC (or 24 V DC) into regulated DC voltages (typically 5 V for logic, ±12 V, and 24 V) needed by the CPU, memory, I/O modules and communication circuits. Its quality decides the reliability of the whole controller. <b>(i) Stable voltage:</b> processors and memory need a well-regulated supply; a change in supply voltage may cause wrong operation or corrupt data. <b>(ii) Filtering and protection:</b> it filters line noise and spikes and protects against surges, over-voltage, over-current and short circuit. <b>(iii) Hold-up time and brown-out detection:</b> during a short power dip, it holds the voltage for several ms so that the CPU can save its state or shut down safely. <b>(iv) Battery backup:</b> supports RAM contents (user program, retentive data), and the real-time clock during power failure. <b>(v) Isolation</b> between mains and logic voltages for safety. <b>(vi) Supply to field devices:</b> many PLCs offer a 24 V DC auxiliary output for sensors. Therefore a properly sized, clean supply is essential for the dependable, safe operation of the PLC; the supply should be rated 20–30 % above the total load.</p>
-<h4>(b) Importance of the CPU</h4>
-<p>The CPU is the heart and brain of the PLC and controls everything that takes place within the system. It contains the microprocessor chip, system clock and memory, and its major roles are: (i) <b>Executing the user program</b> – fetching each instruction from memory, decoding and executing it, solving logic, arithmetic, timer, counter, comparison, data-move and PID operations, in the repetitive scan cycle (input scan → program scan → output scan). (ii) <b>Controlling data transfer</b> over the address, data and control buses between memory and I/O. (iii) <b>Managing memory</b> – the ROM operating system, the user RAM, and the I/O image tables. (iv) <b>Communication</b> with the programming device, HMIs, other PLCs and networks. (v) <b>Self-diagnosis and fault handling</b> – watchdog timer, memory and I/O checks, fault indicators, mode control (RUN/PROG/TEST). (vi) <b>Timing</b> – the clock determines scan speed; scan time of a few ms decides how fast the controller reacts. The processing power and memory size of the CPU decide the number of I/O points, programme size and complexity that the PLC can handle, so its selection is the first step when choosing a PLC.</p></div>
+<div class="qa" id="b4-3">
+<div class="qhead"><h3>Q. Explain the importance of Power Supply and CPU in a PLC.</h3><span class="marks">6 marks each</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q17(b)</span><span class="tag">Jun 2023 · Q18(b)</span></div>
 
-<div class="qa" id="b4-4"><div class="qhead"><h3>Q. Draw the ladder diagram for realising NAND and XOR logic using PLC. / AND and OR logic.</h3><span class="marks">8 marks</span></div>
-<div class="tags"><span class="tag">Jun 2023 · Q18(a)</span><span class="tag">Apr 2026 · Q18(a)</span><span class="tag">Apr 2025 · Q18(a) (AND &amp; OR)</span></div>
-<h4>NAND gate: $Y=\overline{A\cdot B}$</h4>
-<p>The output is ON for every input combination except when both A and B are ON. Using De Morgan's theorem, $\overline{A\cdot B}=\bar A+\bar B$, which gives two normally-closed contacts in parallel.</p>
-<pre class="fig">
- |------+----|/|----+--------------( )-----|     Rung: A and B are the NC (XIO) contacts
- |      |  I0.0 (A)  |              Q0.0 (Y) |
- |      +----|/|-----'                       |     Truth table
- |         I0.1 (B)                           |     A B | Y
-                                                    0 0 | 1
- Equivalent: AND gate whose output is inverted      0 1 | 1
- (A and B in series driving an internal coil M1;    1 0 | 1
-  then Y = NC contact of M1)                        1 1 | 0
-</pre>
-<h4>XOR gate: $Y=A\oplus B=A\bar B+\bar A B$</h4>
-<p>The output is ON when exactly one of the inputs is ON. We use two series branches in parallel: one with A (NO) in series with B (NC), the other with A (NC) in series with B (NO).</p>
-<pre class="fig">
- |------+---| |---|/|----+---------------( )-----|     A  B | Y
- |      |  I0.0 (A) I0.1 (B)  |            Q0.1 (Y) |     0  0 | 0
- |      |                     |                     |     0  1 | 1
- |      +---|/|---| |--------+                     |     1  0 | 1
- |         I0.0 (A) I0.1 (B)                         |     1  1 | 0
-</pre>
-<h4>AND &amp; OR (for the April 2025 variant)</h4>
-<pre class="fig">
- AND:  |---| |---| |-------( )--|        OR:  |---+---| |---+-----( )--|
-          I0.0   I0.1     Q0.0                 |   I0.0     |      Q0.1
-                                               +---| |------'
-                                                   I0.1
-</pre>
-<p><b>Explanation.</b> In the ladder logic, series contacts act as AND and parallel contacts as OR. NO contacts pass power when the associated input is energised (logic 1), NC contacts when it is de-energised (logic 0). Because the PLC solves each rung from left to right every scan, the output coil reflects the combination of input states continuously. These elementary gates can be combined to realise any combinational logic function.</p></div>
+<h4>1. Importance of the Power Supply in a PLC (6 marks)</h4>
+<ol>
+<li><b>Regulated Logic Voltages:</b> Generates stable $+5\text{ V}$ and $+3.3\text{ V}$ DC for microprocessors; even a tiny $5\%$ voltage sag would cause digital logic errors or microcomputer resets.</li>
+<li><b>Heavy Industrial Line Filtering:</b> Factory mains are plagued by motor starting surges, harmonic distortion, and welding spikes. The power supply filters these transients before they reach delicate ICs.</li>
+<li><b>Brownout Protection & Hold-Up Time:</b> During momentary power interruptions ($20\text{–}50\text{ ms}$), reservoir capacitors sustain DC output long enough for the CPU to safely store volatile data into retentive memory before shutdown.</li>
+<li><b>Battery Backup Charging:</b> Maintains the lithium backup battery that protects user RAM programs and real-time clock during prolonged factory power outages.</li>
+<li><b>Isolation Barrier:</b> Galvanically isolates hazardous $230\text{ V AC}$ mains from the plant operator and low-voltage digital electronics.</li>
+</ol>
 
-<div class="qa" id="b4-5"><div class="qhead"><h3>Q. Explain the working of counters in a PLC with an example (and mention applications).</h3><span class="marks">6 – 8 marks</span></div>
-<div class="tags"><span class="tag">Jun 2023 · Q17(a) (8)</span><span class="tag">May 2024 · Q18(a) (6)</span><span class="tag">Apr 2025 · Q17(b) (6)</span></div>
-<p>A counter is a PLC instruction that counts the number of occurrences of an event, each event being a false-to-true (rising edge) transition of the input rung. In place of mechanical or electromechanical counters, it uses a sensor to detect operations, which are processed by software, so the failure rate is reduced and accuracy is increased. Every counter has a <b>preset value (PRE)</b>, which is the number of counts to be reached; an <b>accumulated value (ACC)</b> which is the number of counts so far; and the status bits <b>CU</b> (count-up enabled), <b>CD</b> (count-down enabled), <b>DN</b> (done – set when ACC ≥ PRE), and <b>OV/UN</b> (overflow/underflow).</p>
-<p><b>Types of counters.</b> (i) <b>Up counter (CTU):</b> ACC increases by 1 on each false→true transition; DN is set when ACC ≥ PRE. (ii) <b>Down counter (CTD):</b> ACC decreases by 1 each time; DN is true while ACC ≥ PRE (preloaded) or set when ACC reaches 0 depending on the PLC. (iii) <b>Up/down counter (CTUD):</b> counts up on CU and down on CD, useful for keeping the inventory of items in a bin. (iv) <b>High-speed counter:</b> hardware module for pulses faster than the scan rate, such as encoder signals. The counter does not reset automatically when its rung goes false; it must be reset by a <b>RES</b> instruction with the same address, which sets ACC to zero and clears DN.</p>
-<p><b>Example – counting 10 bottles and then starting a packing machine.</b></p>
-<pre class="fig">
- Rung 1 : count bottles (I0.0 = photo-sensor)
- |---| |---------------------------[ CTU  C5:0   PRE 10   ACC 0 ]---|   (counts each bottle that passes)
-     I0.0
- Rung 2 : action when the preset is reached
- |---| |--- C5:0/DN ---------------------------------------------( )--|   Q0.0 = Packing machine / conveyor stop
- Rung 3 : reset the counter (manual reset or after packing)
- |---| |--- I0.1 (Reset PB) --------------------------------------[RES C5:0]--|
-</pre>
-<p>Each time a bottle interrupts the light beam, I0.0 goes from 0 to 1 and the count ACC increases by one. After 10 bottles ACC = PRE = 10, the done bit C5:0/DN becomes true, and the output Q0.0 starts the packing machine. When packing is finished, the reset push button I0.1 executes RES and the counter is ready again. <b>Applications:</b> counting products on a conveyor, batch filling, packaging, parking lot vehicle counting, rotation counting of shafts, limiting the number of cycles of a machine, and keeping stock levels (up/down counting).</p></div>
+<h4>2. Importance of the CPU in a PLC (6 marks)</h4>
+<ol>
+<li><b>Master Control & Coordination:</b> Serves as the central brain directing all data transfers across address, data, and control buses.</li>
+<li><b>Program Execution:</b> Solves ladder logic rungs sequentially at microsecond speeds, performing Boolean gating, PID math, counting, and data comparisons.</li>
+<li><b>Deterministic Scan Management:</b> Manages the rigid 3-phase scan cycle (Input Read $\to$ Logic Solve $\to$ Output Write), ensuring deterministic control of fast machinery.</li>
+<li><b>Self-Diagnostics & Safety:</b> Constantly monitors internal memory parity, I/O module health, and bus communication. Resets a hardware watchdog timer each scan cycle; if the program hangs, the watchdog trips and safely turns all outputs OFF.</li>
+<li><b>Communications Hub:</b> Manages data interchange with SCADA networks, remote I/O drops, and operator touchscreens (HMIs).</li>
+</ol>
+</div>
 
-<div class="qa" id="b4-6"><div class="qhead"><h3>Q. Explain various timers in PLC / the classification of timers (two types of timers).</h3><span class="marks">6 marks</span></div>
+<div class="qa" id="b4-4">
+<div class="qhead"><h3>Q. Draw the ladder diagram for realising NAND and XOR logic using PLC.</h3><span class="marks">8 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q18(a)</span><span class="tag">Apr 2026 · Q18(a)</span></div>
+
+<h4>1. NAND Logic: $Y = \overline{A\cdot B} = \bar A + \bar B$ (De Morgan's Law)</h4>
+<p>The output is ON for all states <i>except</i> when both inputs A and B are simultaneously ON. In ladder logic, this is realised as <b>two normally-closed (NC) contacts in parallel</b>:</p>
+<pre class="fig">
+ |--+---|/|---+-------------------------------------( )---|
+ |  |  I0.0   |                                      Q0.0
+ |  |  (A)    |                                      (NAND Output)
+ |  +---|/|---+
+        I0.1
+        (B)
+
+ Truth Table:
+  I0.0 (A)   I0.1 (B)  |  Q0.0 (NAND)
+     0          0      |     1   (Both NC contacts closed -> Power flows)
+     0          1      |     1   (Contact A closed -> Power flows)
+     1          0      |     1   (Contact B closed -> Power flows)
+     1          1      |     0   (Both NC contacts open -> Power cut!)
+</pre>
+
+<h4>2. XOR (Exclusive-OR) Logic: $Y = A\oplus B = A\cdot\bar B + \bar A\cdot B$</h4>
+<p>The output is ON if either input is ON, but NOT both. In ladder logic, this is realised by <b>two parallel rungs</b>, each consisting of one NO contact and one NC contact in series:</p>
+<pre class="fig">
+ |--+---| |--|/|---+--------------------------------( )---|
+ |  |  I0.0  I0.1  |                                 Q0.1
+ |  |  (A)   (B')  |                                 (XOR Output)
+ |  |              |
+ |  +---|/|--| |---+
+       I0.0  I0.1
+       (A')  (B)
+
+ Truth Table:
+  I0.0 (A)   I0.1 (B)  |  Q0.1 (XOR)
+     0          0      |     0   (Neither branch conducts)
+     0          1      |     1   (Bottom branch A'.B conducts)
+     1          0      |     1   (Top branch A.B' conducts)
+     1          1      |     0   (Both branches broken)
+</pre>
+</div>
+
+<div class="qa" id="b4-5">
+<div class="qhead"><h3>Q. Explain the working of counters in a PLC with an example program and mention applications.</h3><span class="marks">6 – 8 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q17(a)</span><span class="tag">May 2024 · Q18(a)</span><span class="tag">Apr 2025 · Q17(b)</span></div>
+
+<h4>1. Operating Principle & Counter Parameters</h4>
+<p>A PLC software counter monitors an input sensor and increments its Accumulated Value (ACC) each time the input transitions from false to true ($0 \to 1$). Parameters:</p>
+<ul>
+<li><b>Preset Value (PRE):</b> The target count.</li>
+<li><b>Accumulated Value (ACC):</b> The current count of pulses received.</li>
+<li><b>Done Bit (DN):</b> Sets to 1 when $\text{ACC} \ge \text{PRE}$.</li>
+<li><b>Reset Instruction (RES):</b> A separate instruction that clears $\text{ACC} = 0$ and $\text{DN} = 0$.</li>
+</ul>
+
+<h4>2. Example Program: 10-Bottle Box Packing System</h4>
+<p>A conveyor carries bottles past a photoelectric sensor (I0.0). When 10 bottles pass, the conveyor stops and a packaging ram energises (Q0.0). Pressing Reset button (I0.1) clears the counter.</p>
+<pre class="fig">
+ Rung 1: Count each bottle passing photo-sensor I0.0
+ |--| |---------------------------------[ CTU C5:0        ]--|
+    I0.0 (Photo Sensor)                       Preset: 10
+                                              Accum:   0
+
+ Rung 2: When count reaches 10, energise Packaging Ram Q0.0
+ |--| |---------------------------------------------------( )--|
+    C5:0/DN (Done bit)                                     Q0.0 (Packaging Ram)
+
+ Rung 3: Reset counter via operator button I0.1
+ |--| |-------------------------------------------------[ RES C5:0 ]--|
+    I0.1 (Reset Pushbutton)
+</pre>
+<p><b>Applications:</b> (1) Batch filling of pills and bottles, (2) Monitoring parking garage capacity (Up/Down counter), (3) Machine maintenance scheduling based on operation cycles, (4) Cut-to-length sheet metal shears.</p>
+</div>
+
+<div class="qa" id="b4-6">
+<div class="qhead"><h3>Q. Explain various timers used in a PLC (TON, TOF, RTO) with timing diagrams.</h3><span class="marks">6 marks</span></div>
 <div class="tags"><span class="tag">May 2024 · Q17(a)</span><span class="tag">Apr 2025 · Q18(b)</span><span class="tag">Apr 2026 · Q18(b)</span></div>
-<p>A timer in a PLC is a software instruction which provides time delays by counting pulses of a clock (time base) and comparing the count with a preset value. It replaces mechanical or pneumatic time-delay relays. The parameters are the <b>time base</b> (e.g. 0.01, 0.1, 1 s), <b>preset (PRE)</b>, <b>accumulated value (ACC)</b>, and the bits <b>EN</b> (timer enable), <b>TT</b> (timing in progress) and <b>DN</b> (done). The total delay is $T = \text{PRE}\times\text{time base}$.</p>
-<p><b>1. On-delay timer (TON).</b> When the input rung becomes true, the timer begins counting; the ACC rises until it equals PRE, then DN is set and the associated output is energised after the delay. If the rung goes false before the preset is reached, the timer resets (ACC = 0, DN = 0). It is used to delay the start of a device, e.g. starting a second motor 10 s after the first.</p>
+
+<h4>1. On-Delay Timer (TON)</h4>
+<p>Delays turning an output ON. When the rung goes TRUE, the timer starts counting. When $\text{ACC} = \text{PRE}$, the Done bit (DN) sets TRUE. If the rung goes FALSE at any point, the timer immediately resets ($\text{ACC} = 0$).</p>
 <pre class="fig">
- Input   ____|-----------------------|______       TON: output comes ON t seconds after the input
- Output  ________________|-----------|______       turns ON; both drop when input drops.
-                  |&lt;-- delay t --&gt;|
+ Input Rung   ____|---------------------------------|__________
+ TON Output   ______________________|---------------|__________
+                      |<-- Delay t -->|
 </pre>
-<p><b>2. Off-delay timer (TOF).</b> The DN bit is set as soon as the rung becomes true, and when the rung goes false the timer starts timing; the output remains ON for the preset time after the input goes OFF, and then switches off. Used to keep a cooling fan running after the motor has stopped.</p>
+
+<h4>2. Off-Delay Timer (TOF)</h4>
+<p>Delays turning an output OFF. When the input rung goes TRUE, the output turns ON immediately. When the input rung goes FALSE, the timer begins timing. The output remains ON during the delay, turning OFF only when time expires.</p>
 <pre class="fig">
- Input   ____|----------|____________________     TOF: output turns ON immediately and stays ON for
- Output  ____|---------------------|__________    t seconds after the input turns OFF.
-                        |&lt;-- delay t --&gt;|
+ Input Rung   ____|------------------|_________________________
+ TOF Output   ____|---------------------------------|__________
+                                     |<-- Delay t -->|
 </pre>
-<p><b>3. Retentive on-delay timer (RTO).</b> Works like a TON but retains its ACC value when the rung goes false or on power loss, resuming when the rung becomes true again, until it is reset by an RES instruction. Used for accumulating the total running time of a machine (maintenance scheduling).</p>
-<p><b>4. Pulse timer (TP) and cyclic/flasher timer:</b> TP gives an output pulse of fixed duration on a trigger; two TONs can be combined to give a repeating flasher.</p>
-<p>The following ladder example is a 10 s on-delay: when I0.0 closes, the timer T4:0 (0.1 s base, PRE = 100) starts, and 10 s later T4:0/DN energises the output Q0.0.</p></div>
+<p><i>Application:</i> Cooling fan running for 60 seconds after a furnace or motor has been switched off.</p>
 
-<div class="qa" id="b4-7"><div class="qhead"><h3>Q. Devise a ladder program to switch on a pump for 100 s; it is then switched off and a heater switched on for 50 s. Then the heater is switched off, and another pump is used to empty the water.</h3><span class="marks">8 – 14 marks</span></div>
-<div class="tags"><span class="tag">May 2024 · Q18(b) (8)</span><span class="tag syl">Model Q17 (14)</span></div>
-<p>The process is a three-step sequence: (1) Pump 1 fills the tank for 100 s; (2) Pump 1 is switched off and the heater on for 50 s; (3) the heater is switched off and Pump 2 empties the tank. It is a timed sequential control problem solved with two on-delay timers and latched (seal-in) internal states.</p>
-<p><b>I/O assignment:</b> I0.0 – Start push-button (NO); I0.1 – Stop push-button (NC wired as NO input, used as XIO in rung 1 &amp; 5); Q0.0 – Pump 1 (filling); Q0.1 – Heater; Q0.2 – Pump 2 (emptying); M0.0 – Sequence running (latch); T1 – TON 100 s (PRE = 1000, 0.1 s base); T2 – TON 50 s (PRE = 500, 0.1 s base).</p>
+<h4>3. Retentive On-Delay Timer (RTO)</h4>
+<p>Functions identically to a TON, with one vital difference: if input power is lost or the rung goes FALSE midway, the timer <b>remembers its accumulated time</b>! When power returns, it resumes timing from where it left off. It can only be reset by an explicit <b>[RES]</b> instruction.</p>
+<p><i>Application:</i> Tracking cumulative motor running hours across shifts for scheduled bearing lubrication.</p>
+</div>
+
+<div class="qa" id="b4-7">
+<div class="qhead"><h3>Q. Devise a ladder program to switch on a pump for 100 s; it is then switched off and a heater switched on for 50 s. Then the heater is switched off, and another pump is used to empty the water.</h3><span class="marks">8 – 14 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q18(b)</span><span class="tag syl">Model Paper Q17</span></div>
+
+<div class="intuition">
+<b>💡 Logic Breakdown:</b><br>
+Sequence: <b>START</b> $\implies$ <b>Pump 1 Fills (100 s)</b> $\implies$ <b>Heater Heats (50 s)</b> $\implies$ <b>Pump 2 Drains</b>.<br>
+We use an internal Run relay (M0.0) with a start/stop seal-in latch, and two On-Delay Timers: T1 (100 s) and T2 (50 s).
+</div>
+
+<h4>I/O Address Table</h4>
+<table>
+<tr><th>Symbol</th><th>Address</th><th>Description</th></tr>
+<tr><td><b>START</b></td><td>I0.0</td><td>Normally-Open Start Pushbutton</td></tr>
+<tr><td><b>STOP</b></td><td>I0.1</td><td>Normally-Closed Stop Pushbutton</td></tr>
+<tr><td><b>PUMP 1</b></td><td>Q0.0</td><td>Inlet Filling Pump</td></tr>
+<tr><td><b>HEATER</b></td><td>Q0.1</td><td>Heating Element</td></tr>
+<tr><td><b>PUMP 2</b></td><td>Q0.2</td><td>Emptying Drain Pump</td></tr>
+<tr><td><b>RUN</b></td><td>M0.0</td><td>Internal Master Sequence Latch Relay</td></tr>
+<tr><td><b>T1</b></td><td>T4:1</td><td>TON Timer: $100\text{ s}$ ($\text{PRE} = 1000$, $\text{Base} = 0.1\text{ s}$)</td></tr>
+<tr><td><b>T2</b></td><td>T4:2</td><td>TON Timer: $50\text{ s}$ ($\text{PRE} = 500$, $\text{Base} = 0.1\text{ s}$)</td></tr>
+</table>
+
+<h4>Complete Ladder Diagram</h4>
 <pre class="fig">
- Rung 1 : Start/stop latch for the sequence
- |--+--| |--+--|/|----------------------------( )--|
- |  I0.0    |  I0.1                           M0.0 (RUN)
- |--+--| |--'
-    M0.0
+ Rung 1: Master Start / Stop Seal-in Latch
+ |--+--| |--+------------|/|--------------------------------( )---|
+ |  |  I0.0 |            I0.1                                M0.0 (Master RUN)
+ |  |  START|            STOP
+ |  +--| |--+
+ |     M0.0 |
+ |          |
+ Rung 2: Pump 1 runs during initial 100 s (RUN is ON, T1 not done)
+ |--| |------------------|/|--------------------------------( )---|
+    M0.0                 T4:1/DN                             Q0.0 (Pump 1)
 
- Rung 2 : Pump 1 ON for 100 s   (RUN and timer T1 not done)
- |--| |--------|/|----------------------------( )--|
-    M0.0       T1.DN                          Q0.0 (Pump 1)
+ Rung 3: Timer T1 timing 100 s while RUN is active
+ |--| |---------------------------------[ TON T4:1                ]--|
+    M0.0                                      Preset: 1000 (0.1s = 100s)
 
- Rung 3 : Timer T1 – 100 s starts with RUN
- |--| |------------------------------[ TON T1   PRE 1000 (0.1 s) ]--|
-    M0.0
+ Rung 4: Heater runs for 50 s (After T1 done, until T2 done)
+ |--| |--------| |-------|/|--------------------------------( )---|
+    M0.0       T4:1/DN   T4:2/DN                             Q0.1 (Heater)
 
- Rung 4 : Heater ON for 50 s  (after T1 done, until T2 done)
- |--| |--------| |--------|/|-------------( )--|
-    M0.0       T1.DN      T2.DN           Q0.1 (Heater)
+ Rung 5: Timer T2 timing 50 s (Starts when T1 finishes)
+ |--| |--------| |----------------------[ TON T4:2                ]--|
+    M0.0       T4:1/DN                        Preset: 500 (0.1s = 50s)
 
- Rung 5 : Timer T2 – 50 s starts when T1 is done
- |--| |------------------------------[ TON T2   PRE 500 (0.1 s) ]--|
-    T1.DN
-
- Rung 6 : Pump 2 empties the tank (after T2 done)
- |--| |--------| |-----------------------( )--|
-    M0.0       T2.DN                      Q0.2 (Pump 2)
+ Rung 6: Pump 2 runs to empty tank (After Heater finishes / T2 done)
+ |--| |--------| |------------------------------------------( )---|
+    M0.0       T4:2/DN                                       Q0.2 (Pump 2)
 </pre>
-<p><b>Operation.</b> Pressing Start sets the latch M0.0 (rung 1). In rung 2, Pump 1 (Q0.0) runs because M0.0 is true and T1.DN is false, while T1 begins timing 100 s in rung 3. At 100 s, T1.DN becomes true: Pump 1 turns off (rung 2 opens), the heater Q0.1 turns on (rung 4) and T2 starts timing 50 s (rung 5). At 50 s, T2.DN becomes true: the heater is switched off (rung 4 opens) and Pump 2 (Q0.2) turns on, to empty the tank (rung 6). The Stop button drops M0.0, resets both timers and all outputs. A level switch NC contact for "tank empty" can be added in series with M0.0's latch to end the cycle automatically.</p></div>
+
+<h4>Step-by-Step Circuit Operation</h4>
+<ol>
+<li><b>Start:</b> Pressing button I0.0 energises master relay M0.0, which seals itself in through its parallel contact (Rung 1).</li>
+<li><b>Step 1 (Pump 1 ON):</b> Because M0.0 is TRUE and T4:1/DN is FALSE, Pump 1 (Q0.0) starts filling water (Rung 2). Concurrently, timer T4:1 starts timing 100 seconds (Rung 3).</li>
+<li><b>Step 2 (Heater ON):</b> At $t = 100\text{ s}$, timer T4:1 finishes and sets bit T4:1/DN TRUE. This opens Rung 2 (stopping Pump 1) and closes Rung 4 (turning ON the Heater Q0.1). Concurrently, timer T4:2 starts timing 50 seconds (Rung 5).</li>
+<li><b>Step 3 (Pump 2 ON):</b> At $t = 150\text{ s}$, timer T4:2 finishes and sets bit T4:2/DN TRUE. This opens Rung 4 (switching OFF the Heater) and closes Rung 6 (turning ON Pump 2 to drain the tank).</li>
+<li><b>Stop:</b> Pressing Stop button I0.1 de-energises M0.0, immediately shutting down all timers and pumps.</li>
+</ol>
+</div>
 
 </main></div>
 </body>

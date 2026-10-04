@@ -14,252 +14,378 @@
 <div class="layout"><main>
 
 <h1 class="title">Module 3 · Data Transmission and Virtual Instrumentation</h1>
-<p class="lead">Cable transmission (analog &amp; digital) · fibre optics · pneumatic transmission · process control networks · Fieldbus &amp; Profibus · radio, wireless &amp; WLAN · virtual instrument architecture · graphical programming.</p>
+<p class="lead">Cable transmission (analog &amp; digital) · Fibre optics · Pneumatic transmission · Process control networks · Fieldbus &amp; Profibus · Radio vs wireless communication · Virtual instrumentation architecture · Graphical programming.</p>
 
-<input id="search" class="search" placeholder="Search questions in this module (e.g. fibre, wireless, virtual)…">
+<input id="search" class="search" placeholder="Search questions in this module (e.g. fibre, wireless, virtual, fieldbus)…">
 
 <div class="toc"><b>Contents</b>
 <ul>
-<li><a href="#theory">Part 1 – Syllabus theory</a></li>
-<li><a href="#partA">Part 2 – Part A short answers</a></li>
-<li><a href="#partB">Part 3 – Part B long answers</a></li>
+<li><a href="#theory">Part 1 – Syllabus Theory (Simplified)</a></li>
+<li><a href="#partA">Part 2 – Part A Short Answers (3 marks)</a></li>
+<li><a href="#partB">Part 3 – Part B Long Answers (4 – 10 marks)</a></li>
 </ul></div>
 
-<h2 id="theory">Part 1 · Syllabus Theory</h2>
+<!-- ===================== THEORY ===================== -->
+<h2 id="theory">Part 1 · Syllabus Theory (Simplified & Clear)</h2>
 
 <div class="topic" id="t-cable">
-<h3>3.1 Cable transmission of analog and digital data</h3>
-<p>In an industrial plant, the sensor and the controller are often hundreds of metres apart, so the measurement signal must be transmitted reliably through cables. The simplest and still most common method is <b>analog signal transmission</b> in which the measured value is represented by the amplitude of a voltage or current. <b>Current loops</b> (4–20 mA) are preferred over voltage signals because current is the same at every point of the series loop, so cable resistance and moderate voltage pick-up do not cause errors, the receiver has low impedance (250 Ω converts the signal into 1–5 V), and the "live zero" of 4 mA allows detection of open-circuit faults (0 mA = broken wire) and powers two-wire transmitters from the loop. Voltage transmission (0–5 V, 0–10 V) is used over short distances. Cable types are <b>twisted pair</b> (cancels magnetic interference), <b>shielded twisted pair</b> (electrostatic shielding, shield grounded at one end to avoid ground loops) and <b>coaxial cable</b> (high-frequency signals).</p>
-<p><b>Digital data transmission</b> sends information as binary codes (bits) over a cable, either in <i>parallel</i> (many wires, short distance, e.g. IEEE-488/GPIB) or <i>serial</i> form (one pair of wires, long distances). Common serial standards are RS-232 (single-ended, up to about 15 m, 20 kbps), RS-422 (differential, up to 1.2 km, one driver and ten receivers) and RS-485 (differential, multi-drop up to 32 nodes, 1.2 km, up to 10 Mbps), as well as Ethernet over twisted pair. Digital transmission is immune to noise as long as 0 and 1 are distinguishable, can use error-detection codes (parity, CRC), allows multiplexing of many variables on one cable, and carries diagnostic information. It requires A/D and D/A conversion and protocols.</p>
+<h3>3.1 Cable Transmission: Analog vs Digital</h3>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> 
+<ul>
+<li><b>Analog 4–20 mA Current Loop:</b> Like a garden hose where the flow rate of water represents pressure. Because the same current flows through every point in a series wire loop, line resistance of long cables causes zero voltage-drop errors!</li>
+<li><b>Digital Transmission:</b> Instead of sending a continuous voltage or current, we send coded packets of 1s and 0s. As long as the receiver can distinguish a 1 from a 0, the measurement has $100\%$ perfect accuracy!</li>
+</ul>
+</div>
+
+<h4>Why 4–20 mA Current Loops are the Industrial Standard</h4>
+<ol>
+<li><b>Immune to Cable Resistance:</b> Kirchoff's Current Law ensures the exact same loop current reaches the receiver whether the cable is $10\text{ metres}$ or $1000\text{ metres}$ long.</li>
+<li><b>Live Zero at 4 mA:</b> If a wire breaks or a transmitter burns out, loop current drops to $0\text{ mA}$. The controller immediately detects a wire-break alarm ($0\text{ mA}$) vs a legitimate zero reading ($4\text{ mA}$).</li>
+<li><b>Two-Wire Transmitter Power:</b> The baseline $4\text{ mA}$ carries enough electric power to run the sensor's internal microelectronics over the exact same two wires!</li>
+<li><b>Simple Conversion:</b> A precision $250\,\Omega$ resistor at the controller converts $4\text{–}20\text{ mA}$ into a standard $1\text{ to }5\text{ V}$ input for an A/D converter ($V = I\cdot R$).</li>
+</ol>
 </div>
 
 <div class="topic" id="t-fibre">
-<h3>3.2 Fibre-optic data transmission</h3>
-<p>An optical fibre transmits data as pulses of light through a thin strand of glass or plastic. A fibre has a central <b>core</b> of refractive index $n_1$ surrounded by a <b>cladding</b> of slightly lower index $n_2$ ($n_1>n_2$) and an outer protective jacket. Light injected into the core within the acceptance angle is guided by <b>total internal reflection</b> at the core–cladding boundary. The critical angle and numerical aperture are</p>
-$$ \theta_c=\sin^{-1}\!\left(\frac{n_2}{n_1}\right),\qquad \text{NA}=\sin\theta_a=\sqrt{n_1^{2}-n_2^{2}} . $$
-<p>The link has three parts: (i) a <b>transmitter</b> – an LED (cheap, short distance, multimode) or laser diode (high power, narrow spectrum, long distance) which converts the electrical signal into light (intensity modulation); (ii) the <b>fibre cable</b> – multimode step-index, multimode graded-index or single-mode; and (iii) a <b>receiver</b> – a PIN photodiode or avalanche photodiode that converts light back into an electrical signal, followed by an amplifier and decision circuit. Repeaters are inserted after long runs to counter attenuation, given by $\alpha=\dfrac{10}{L}\log_{10}\dfrac{P_{in}}{P_{out}}$ dB/km (about 0.2 dB/km for single-mode at 1550 nm).</p>
+<h3>3.2 Fibre-Optic Data Transmission</h3>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> Transmitting data as pulses of light flashed through a microscopic glass strand. Light trapped inside the glass core bounces along via <b>Total Internal Reflection</b>. Since glass carries light rather than electricity, it is $100\%$ immune to electromagnetic noise, sparks, and lightning strikes!
+</div>
+
 <pre class="fig">
- Electrical    +-----------+   light   +----------------------+   light   +-----------+  Electrical
- data  ------&gt;| LED/LASER |--========&gt;| core | cladding|jacket |========--&gt;| PIN /APD  |------&gt; data
-               |  driver   |           +----------------------+           | + amp     |
-               +-----------+            total internal reflection         +-----------+
+ Electrical       +---------------+     Light     +-------------------------+     Light     +---------------+     Electrical
+ Signal In =====> | LED / Laser   |==============>| Core (n1) | Cladding(n2)|==============>| Photodiode    |=====> Signal Out
+                  | Driver Source |               +-------------------------+               | PIN/APD + Amp |
+                  +---------------+                  Total Internal Reflection              +---------------+
 </pre>
-<p><b>Advantages:</b> immunity to electromagnetic interference and lightning (ideal near motors and high-voltage plant), very large bandwidth and data rate, low attenuation over long distances, galvanic isolation, no sparks (safe in explosive atmospheres), small size, light weight and security against tapping. <b>Disadvantages:</b> higher cost of terminals, difficult jointing/splicing, fragility and bend loss, and need for electro-optical conversion.</p>
+
+<h4>Optics Principles & Formulae</h4>
+<ul>
+<li><b>Core & Cladding:</b> Central glass core has refractive index $n_1$; surrounding cladding has slightly lower index $n_2$ ($n_1 > n_2$).</li>
+<li><b>Critical Angle ($\theta_c$):</b> Light striking the boundary at angles greater than $\theta_c$ reflects completely back into the core:
+$$ \theta_c = \sin^{-1}\!\left(\frac{n_2}{n_1}\right) $$
+</li>
+<li><b>Numerical Aperture ($\text{NA}$):</b> Measures light-gathering capacity of the fibre:
+$$ \text{NA} = \sin\theta_a = \sqrt{n_1^2 - n_2^2} $$
+</li>
+<li><b>Signal Attenuation ($\alpha$):</b> Loss of optical power over distance $L$:
+$$ \alpha = \frac{10}{L}\,\log_{10}\!\left(\frac{P_{in}}{P_{out}}\right)\ \text{dB/km} $$
+</li>
+</ul>
+<p><b>Industrial Merits:</b> Complete immunity to high-voltage EMI and motor surges, zero spark risk in explosive petroleum plants, ultra-high bandwidth, and total electrical isolation.</p>
 </div>
 
 <div class="topic" id="t-pneu">
-<h3>3.3 Pneumatic transmission</h3>
-<p>In pneumatic transmission, the measured value is represented by the pressure of air in a tube, with a standard range of <b>3–15 psi</b> (20–100 kPa), which is conveyed through small-bore tubing (6 mm) from the transmitter to the controller or valve positioner. The 3 psi "live zero" detects failures. The transmitter is typically a <b>flapper–nozzle</b> mechanism: a flapper positioned by the measurement (via bellows or force-balance beam) restricts the escape of air from a nozzle that is supplied through a fixed restriction from a 20 psi air supply; the back-pressure in the nozzle changes with the flapper gap, and is amplified by a pneumatic relay (booster) to give the 3–15 psi output.</p>
-<p><b>Merits:</b> intrinsically safe (no electric spark) so used in explosive/flammable atmospheres, simple and rugged, inexpensive, directly drives valve actuators. <b>Demerits:</b> limited transmission distance (a few hundred metres) because of the <b>time lag</b> from air compressibility and tube resistance and capacitance (speed of propagation is of the order of the speed of sound, about 300 m/s), need of clean, dry compressed air, leakage, slow response and difficulty interfacing with computers (needs I/P and P/I converters).</p>
+<h3>3.3 Pneumatic Transmission</h3>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> Transmitting process measurements using compressed air pressure inside a small tube ($3\text{ to }15\text{ psi}$). A flapper moves towards or away from an air nozzle, changing the back-pressure of air.
+</div>
+
+<pre class="fig">
+ Regulated Supply Air (20 psi)
+            |
+      [ Orifice Restrictor ]-----+-----> To Pneumatic Booster Relay =====> 3 - 15 psi Output Signal
+                                 |
+                             [ Nozzle ] <--- Flapper Gap Controlled by Sensor Bellows
+</pre>
+<h4>Working & Characteristics</h4>
+<ul>
+<li><b>Standard Range:</b> $3\text{ to }15\text{ psi}$ ($20\text{ to }100\text{ kPa}$ or $0.2\text{ to }1.0\text{ bar}$). $3\text{ psi} = 0\%$ reading, $15\text{ psi} = 100\%$ reading. The $3\text{ psi}$ is a live zero.</li>
+<li><b>Flapper-Nozzle Mechanism:</b> Clean air at $20\text{ psi}$ passes through a fixed restrictor. When the flapper moves closer to the nozzle, escaping air is restricted, and nozzle back-pressure rises rapidly. A pneumatic relay boosts airflow volume to drive long transmission tubing.</li>
+<li><b>Merits:</b> Inherently safe (no electrical sparks) in explosive hydrocarbon environments; simple, rugged, and connects directly to pneumatic valves.</li>
+<li><b>Limitations:</b> Transmission lag (signals travel at sound speed $\approx 330\text{ m/s}$; pneumatic time constant grows with distance squared: $\tau \propto L^2$), limited distance ($<200\text{ m}$), and requires clean, bone-dry air supply.</li>
+</ul>
 </div>
 
 <div class="topic" id="t-pcn">
-<h3>3.4 Process control networks – functions and general characteristics</h3>
-<p>A <b>process control network</b> is the communication infrastructure that links field instruments (sensors, transmitters, actuators), controllers (PLCs/DCS), operator stations and supervisory computers in an automated plant. Its <b>functions</b> are to: collect measurement data from the field; deliver control commands to final control elements; allow configuration, calibration and diagnostics of devices; share data between controllers and the supervisory/business level (historians, MES/ERP); synchronise time and events; manage alarms; and provide secure, deterministic communication.</p>
-<p><b>General characteristics</b> of such networks are: <b>real-time/deterministic response</b> (guaranteed maximum delay), <b>reliability and redundancy</b> (dual cables and controllers), <b>noise immunity</b> suitable for an industrial environment, <b>topology</b> (bus, star, ring or tree), <b>scalability</b> and easy expansion, <b>interoperability</b> through open standards, <b>distance and speed</b> sufficient to cover the plant, <b>security</b> (isolation from the corporate/IT network and access control), <b>intrinsic safety</b> in hazardous areas, and low cost of cabling by multi-drop wiring. Commonly the plant network is arranged as a hierarchy: field level (sensor bus/fieldbus), control level (PLC/DCS network), supervisory level (SCADA/Ethernet) and enterprise level.</p>
-<h4>Fieldbus</h4>
-<p><b>Fieldbus</b> is the all-digital, two-way, multi-drop serial communication system that replaces 4–20 mA point-to-point wiring by connecting many field devices on one cable. Its advantages are large saving in wiring, rich information (device status and diagnostics), multi-variable transmission, remote configuration, and distributed control in the field devices themselves. <i>FOUNDATION Fieldbus H1</i> works at 31.25 kbit/s over twisted pair with bus power and intrinsically safe options (up to 32 devices per segment, 1900 m), and the high-speed Ethernet (HSE) at 100 Mbit/s links H1 segments to the control system. The physical layer, data link layer and application layer (with a user layer containing function blocks like AI, PID, AO) are defined.</p>
-<h4>Profibus</h4>
-<p><b>PROFIBUS</b> (Process Field Bus; IEC 61158/EN 50170) is a widely used fieldbus standard with master–slave and token-passing methods. <b>Profibus-DP</b> (Decentralised Peripherals) is high-speed (9.6 kbit/s up to 12 Mbit/s) over RS-485 for factory automation, connecting a PLC to remote I/O, drives and sensors (up to 126 stations). <b>Profibus-PA</b> (Process Automation) uses the same protocol on the intrinsically safe MBP physical layer (31.25 kbit/s) with bus power for process and hazardous areas, and <b>Profibus-FMS</b> is for peer-to-peer communication between controllers. The <b>comparison</b> with Foundation Fieldbus: Profibus is mainly master–slave with cyclic polling and strong in the factory automation and drives sector, whereas Foundation Fieldbus supports distributed control with function blocks in the field devices and scheduled communication, and is stronger in process industries.</p>
+<h3>3.4 Process Control Networks, Fieldbus, and Profibus</h3>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> In older plants, every single sensor required its own pair of copper wires running all the way back to the control room (miles of cables!). <b>Fieldbus</b> acts like a shared highway (bus): dozens of smart instruments share a single cable, chatting digitally, sending diagnostics, and even calculating PID control right in the field!
+</div>
+
+<h4>Network Hierarchy in an Industrial Plant</h4>
+<pre class="fig">
+ Level 3: Enterprise / Plant Network   ==> Ethernet / TCP-IP (ERP, MES, Historian)
+                          ^
+ Level 2: Supervisory Network          ==> Industrial Ethernet (SCADA, HMI, Engineering Stations)
+                          ^
+ Level 1: Control Network              ==> Deterministic LAN (PLC-to-PLC, DCS Data Highway)
+                          ^
+ Level 0: Field Level Network          ==> Fieldbus H1, Profibus-DP/PA, HART, Modbus
+</pre>
+
+<h4>Comparison: Foundation Fieldbus vs Profibus</h4>
+<table>
+<tr><th>Feature</th><th>Foundation Fieldbus (FF H1)</th><th>PROFIBUS (DP & PA)</th></tr>
+<tr><td><b>Primary Philosophy</b></td><td>Built for continuous process industries; enables <b>Control in the Field</b> via function blocks.</td><td>Built for high-speed factory automation and distributed I/O.</td></tr>
+<tr><td><b>Communication Style</b></td><td>Scheduled (deterministic) + Unscheduled; Publisher-Subscriber.</td><td>Master-Slave cyclic polling with token ring among masters.</td></tr>
+<tr><td><b>Data Rate</b></td><td>$31.25\text{ kbps}$ on H1; $100\text{ Mbps}$ on High Speed Ethernet (HSE).</td><td><b>Profibus-DP:</b> Up to $12\text{ Mbps}$ (RS-485).<br><b>Profibus-PA:</b> $31.25\text{ kbps}$ (Intrinsically safe).</td></tr>
+<tr><td><b>Wiring Economy</b></td><td>Up to 32 devices per segment on a single shielded twisted pair.</td><td>Up to 126 stations on a network using repeaters.</td></tr>
+</table>
 </div>
 
 <div class="topic" id="t-wireless">
-<h3>3.5 Radio, wireless communication and WLAN architecture</h3>
-<p><b>Radio communication</b> transmits information with electromagnetic waves (typically VHF/UHF, 150–900 MHz or 2.4 GHz) from a transmitter to a receiver, usually point-to-point or point-to-multipoint (telemetry) with dedicated radio modems and licensed or licence-free bands. It is used in SCADA for remote, unmanned sites such as pipelines and water networks. <b>Wireless communication</b> in the broader sense covers all media without wires – radio, microwave, infra-red, satellite, cellular (GSM/4G/5G), Wi-Fi (WLAN), Bluetooth and ZigBee / WirelessHART/ISA100 for sensor networks – and normally implies a networked, protocol-based system with addressing, error control and often mesh routing.</p>
+<h3>3.5 Radio vs Wireless Communication</h3>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> "Radio" refers to traditional point-to-point RF links (like walkie-talkies or remote pipeline telemetry). "Wireless" is the broader umbrella of modern networked standards (Wi-Fi, Bluetooth, ZigBee, WirelessHART) that include addressing, routing, encryption, and mesh networking.
+</div>
+
 <table>
-<tr><th>Point</th><th>Radio communication</th><th>Wireless communication (network)</th></tr>
-<tr><td>Meaning</td><td>Transmission with radio waves between dedicated radio sets</td><td>Any wire-free data link (radio, IR, microwave, WLAN, cellular…)</td></tr>
-<tr><td>Topology</td><td>Mostly point-to-point / point-to-multipoint</td><td>Star, mesh, cluster-tree, ad-hoc</td></tr>
-<tr><td>Range</td><td>Long (tens of km with line of sight)</td><td>Varies: short (Bluetooth) to wide (cellular)</td></tr>
-<tr><td>Data rate</td><td>Low to medium (kbps)</td><td>Low to very high (kbps – Gbps)</td></tr>
-<tr><td>Protocols</td><td>Simple proprietary / Modbus over radio</td><td>Standard: IEEE 802.11, 802.15.4, GSM, LTE</td></tr>
-<tr><td>Frequency</td><td>VHF/UHF licensed bands</td><td>Mainly licence-free ISM (2.4/5 GHz) and cellular bands</td></tr>
-<tr><td>Cost/Use</td><td>Remote telemetry, SCADA RTUs</td><td>Office, plant-floor mobility, IoT sensors</td></tr></table>
-<h4>WLAN architecture</h4>
-<p>A wireless LAN (IEEE 802.11) links devices without cables. Its main components are the <b>stations (STA)</b> – wireless clients such as laptops, HMI tablets, PLC modules; the <b>access point (AP)</b> – a bridge between the wireless medium and the wired distribution system (DS); the <b>basic service set (BSS)</b> – the group of stations around one AP, in infrastructure mode, or an independent BSS (IBSS / ad hoc mode) in which stations talk directly; the <b>extended service set (ESS)</b> – several BSSs connected by a common distribution system (Ethernet), allowing roaming; and a <b>portal</b> to other wired networks. Medium access uses CSMA/CA (carrier-sense multiple access with collision avoidance) with acknowledgements, and security is by WPA2/WPA3 encryption.</p>
-<pre class="fig">
-   [STA] [STA]      [STA] [STA]
-      \  /             \  /           BSS = AP + its stations
-      [AP1]-----(Distribution System / Ethernet)-----[AP2]---- [Server / SCADA]
-      BSS 1                                           BSS 2          ESS = BSS1 + BSS2
-</pre>
+<tr><th>Parameter</th><th>Radio Communication</th><th>Wireless Network Communication</th></tr>
+<tr><td><b>Definition</b></td><td>Point-to-point / point-to-multipoint transmission using dedicated RF modems.</td><td>Networked communication over any wire-free channel (Wi-Fi, ZigBee, WirelessHART, cellular).</td></tr>
+<tr><td><b>Topology</b></td><td>Fixed Star or Point-to-Point.</td><td>Self-healing <b>Mesh</b>, Cluster-Tree, Star.</td></tr>
+<tr><td><b>Frequency & Licensing</b></td><td>Often dedicated licensed VHF/UHF bands ($150\text{–}900\text{ MHz}$).</td><td>Unlicensed ISM bands ($2.4\text{ GHz}, 5\text{ GHz}, 868/915\text{ MHz}$).</td></tr>
+<tr><td><b>Protocol</b></td><td>Proprietary or simple Modbus over radio.</td><td>Standardised layered stacks (IEEE 802.11, 802.15.4, WirelessHART).</td></tr>
+<tr><td><b>Primary Use</b></td><td>Long-range telemetry (water reservoirs, oil pipelines across deserts).</td><td>Plant-floor sensor networks, mobile tablet HMIs, rotating equipment monitoring.</td></tr>
+</table>
 </div>
 
 <div class="topic" id="t-vi">
-<h3>3.6 Virtual instrumentation – architecture, comparison and graphical programming</h3>
-<p>A <b>virtual instrument (VI)</b> is a combination of a general-purpose computer, modular measurement hardware and software, which together perform the function of a traditional stand-alone instrument. The defining idea is "<i>the software is the instrument</i>": the user defines the functionality of the measurement system by software, instead of the manufacturer burning it in hardware. National Instruments' LabVIEW is the best known development tool.</p>
-<h4>Architecture of a virtual instrument</h4>
-<pre class="fig">
- +-----------+   +----------------+   +---------------+   +-----------------------------------+
- | Sensors / |--&gt;| Signal         |--&gt;| DAQ hardware  |--&gt;| COMPUTER (PC)                     |
- | process   |   | conditioning   |   | (ADC, DAC,    |   |  Drivers  -&gt; Application software |
- | actuators |&lt;--| (amp, filter)  |&lt;--|  DIO, counter)|&lt;--|  (LabVIEW): analysis, display,    |
- +-----------+   +----------------+   +---------------+   |  storage, network                 |
-                                                           +-----------------------------------+
-</pre>
-<p>The VI architecture consists of the following blocks. <b>(1) Sensors/transducers</b> pick up physical variables. <b>(2) Signal conditioning</b> hardware (SCXI/modules) amplifies, filters, isolates and linearises the signals. <b>(3) Data-acquisition (DAQ) hardware</b> – plug-in cards or external modules (PCI, USB, PXI) containing multiplexers, sample-and-hold, A/D and D/A converters, digital I/O and counters/timers; the sampling theorem $f_s \ge 2 f_{max}$ must be satisfied and resolution is $\text{LSB}=V_{FS}/2^{n}$. <b>(4) Computer</b> providing processor, memory, display, storage, and networking. <b>(5) Driver software</b> (e.g. NI-DAQmx, VISA) that links hardware and application. <b>(6) Application software</b> (LabVIEW, LabWindows/CVI) that gives the user-defined measurement logic, signal analysis (FFT, filtering, statistics), presentation (graphs, indicators) and report generation. A VI has a <b>front panel</b> (user interface: controls and indicators) and a <b>block diagram</b> (graphical source code), plus an icon/connector pane that lets it be used as a sub-VI.</p>
-<h4>Virtual vs traditional instruments</h4>
-<table>
-<tr><th>Feature</th><th>Traditional instrument</th><th>Virtual instrument</th></tr>
-<tr><td>Functionality</td><td>Fixed by the vendor, defined in hardware</td><td>Defined by the user through software</td></tr>
-<tr><td>Cost</td><td>High, one instrument for one function</td><td>Low; same PC and hardware used for many functions</td></tr>
-<tr><td>Flexibility / upgrading</td><td>Difficult; needs new hardware</td><td>Easy; modify software</td></tr>
-<tr><td>Connectivity</td><td>Limited; optional GPIB</td><td>Networked, Internet, database integration</td></tr>
-<tr><td>Processing/display</td><td>Limited built-in</td><td>High-power PC processing, custom displays</td></tr>
-<tr><td>Data storage / reports</td><td>Usually none</td><td>Automatic logging, reports</td></tr>
-<tr><td>Size</td><td>Bulky stand-alone boxes</td><td>Compact</td></tr>
-<tr><td>Technology life</td><td>Slow update cycle</td><td>Rides the fast PC technology cycle</td></tr></table>
-<h4>Graphical programming</h4>
-<p>In <b>graphical programming</b> (G language in LabVIEW) a program is created by placing graphical icons (functions, sub-VIs) on a block diagram and connecting them by <b>wires</b> that carry data. The execution is governed by <b>dataflow</b>: a node executes only when all its inputs have data, and outputs data to the next node as soon as it finishes, so independent branches run in parallel automatically. The key features are: intuitive "drag-and-drop" development, a rich library of acquisition, analysis, and I/O functions, <b>structures</b> (For Loop, While Loop, Case, Sequence), shift registers, clusters and arrays, automatic parallelism (multi-threading), easy creation of the front-panel user interface, and fast debugging (highlight execution, probes). In contrast, <b>sequential (text-based) programming</b> (C, BASIC) executes statements line by line in a defined order, needs knowledge of syntax, and is slower to develop for measurement applications.</p>
+<h3>3.6 Virtual Instrumentation (VI) and Graphical Programming</h3>
+<div class="intuition">
+<b>💡 In Simple Terms:</b> 
+<ul>
+<li><b>Traditional Instrument:</b> A closed metal box (like an oscilloscope or multimeter) with knobs and a fixed screen made by a vendor. If you need a new feature, you must buy a new box.</li>
+<li><b>Virtual Instrument:</b> A standard PC + plug-in measurement hardware + software (LabVIEW). <b>"The Software IS the Instrument!"</b> You design the knobs, graphs, and math on your computer screen. Change the software, and your multimeter instantly becomes a spectrum analyser!</li>
+</ul>
 </div>
 
+<h4>Virtual Instrument Architecture</h4>
+<pre class="fig">
+ [ Physical Process ]====>[ Signal Conditioning ]====>[ DAQ Hardware ]====>[ COMPUTER (PC) ]
+ (Temp, Pressure,        (Amplifier, Filter,          (MUX, S/H, ADC,      | Driver Software (NI-DAQmx)
+  Vibration, Speed)       Isolation, Bridge)           DAC, DIO, Timer)    | Application (LabVIEW)
+                                                                           |  - Front Panel (GUI)
+                                                                           |  - Block Diagram (Logic)
+</pre>
+
+<h4>Graphical vs Sequential Programming</h4>
+<table>
+<tr><th>Feature</th><th>Graphical Programming (LabVIEW "G")</th><th>Sequential Text Programming (C / Python)</th></tr>
+<tr><td><b>Execution Model</b></td><td><b>Dataflow:</b> A node executes only when data arrives at all its inputs.</td><td><b>Control Flow:</b> Statements execute strictly line-by-line in sequential order.</td></tr>
+<tr><td><b>Parallelism</b></td><td><b>Automatic Multi-Threading:</b> Independent parallel wires execute simultaneously on multi-core CPUs.</td><td>Requires complex manual multi-threading and thread synchronization code.</td></tr>
+<tr><td><b>User Interface</b></td><td>Front Panel GUI (dials, graphs, LED switches) built by drag-and-drop.</td><td>Requires external GUI libraries and hundreds of lines of code.</td></tr>
+<tr><td><b>Debugging</b></td><td>Execution highlighting shows data "bubbles" flowing along wires in real time.</td><td>Breakpoints, step-through debugging, terminal printouts.</td></tr>
+</table>
+</div>
+
+<!-- ===================== PART A ===================== -->
 <h2 id="partA">Part 2 · Part A – Short Answers (3 marks)</h2>
 
-<div class="qa a" id="a3-1"><div class="qhead"><h3>List the advantages of virtual instrumentation systems.</h3><span class="marks">3 marks</span></div>
-<div class="tags"><span class="tag">Jun 2023 · Q6</span><span class="tag">May 2024 · Q5</span><span class="tag">Apr 2025 · Q5</span><span class="tag">Apr 2026 · Q6</span><span class="tag syl">Model Q6</span></div>
-<p>The most-asked advantages are: (1) <b>Low cost</b> – the same PC and DAQ hardware can emulate many instruments (oscilloscope, DMM, spectrum analyser) and the cost per function is much smaller; (2) <b>Flexibility and user-defined functionality</b> – the user can modify the instrument by changing the software; (3) <b>Easy upgrading</b> – new features come from a software upgrade, riding on the rapid PC development; (4) <b>Powerful processing, display and storage</b> – real-time analysis (FFT, statistics), customised displays, data logging and automatic report generation; (5) <b>Connectivity</b> – networking, database access and remote Internet monitoring; (6) <b>Compactness and portability</b>; (7) <b>Shorter development time</b> with graphical programming.</p></div>
+<div class="qa a" id="a3-1">
+<div class="qhead"><h3>List the advantages of virtual instrumentation systems.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q6</span><span class="tag">May 2024 · Q5</span><span class="tag">Apr 2025 · Q5</span><span class="tag">Apr 2026 · Q6</span></div>
+<ol>
+<li><b>Flexibility & Customisation:</b> User defines the instrument's functionality in software rather than being locked to vendor hardware.</li>
+<li><b>Cost-Effective:</b> One general-purpose PC and DAQ card can perform functions of an oscilloscope, FFT analyser, datalogger, and multimeter.</li>
+<li><b>Advanced Analysis & Display:</b> Leverages PC processing power for complex FFTs, statistical math, 3D graphics, and database logging.</li>
+<li><b>Open Connectivity:</b> Readily connects with Ethernet, cloud databases, USB, and industrial fieldbuses.</li>
+<li><b>Rapid Development:</b> Graphical drag-and-drop programming cuts system design time dramatically.</li>
+</ol>
+</div>
 
-<div class="qa a" id="a3-2"><div class="qhead"><h3>Compare cable transmission of analog and digital data with an example.</h3><span class="marks">3 marks</span></div>
-<div class="tags"><span class="tag">Apr 2026 · Q5</span><span class="tag">Jun 2023 · Q16(b) (6 marks)</span></div>
+<div class="qa a" id="a3-2">
+<div class="qhead"><h3>Compare cable transmission of analog and digital data with an example.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Apr 2026 · Q5</span><span class="tag">Jun 2023 · Q16(b)</span></div>
 <table>
-<tr><th>Point</th><th>Analog transmission</th><th>Digital transmission</th></tr>
-<tr><td>Signal form</td><td>Continuous variation of current/voltage, e.g. 4–20 mA</td><td>Discrete binary bits (0/1) in coded format</td></tr>
-<tr><td>Noise immunity</td><td>Low – noise adds directly to the signal and cannot be removed</td><td>High – noise can be rejected, error detection/correction (CRC)</td></tr>
-<tr><td>Accuracy</td><td>Limited by cable, drift and loop calibration (~0.1–1 %)</td><td>No loss by transmission; accuracy decided by A/D resolution</td></tr>
-<tr><td>Information per cable</td><td>One variable per pair of wires</td><td>Many variables on one cable (multiplexing, multi-drop)</td></tr>
-<tr><td>Diagnostics</td><td>Only live-zero fault detection</td><td>Device status, diagnostics, remote configuration</td></tr>
-<tr><td>Hardware</td><td>Simple; no protocol</td><td>Needs ADC/DAC, protocols, drivers</td></tr>
-<tr><td>Distance &amp; cost</td><td>Wiring cost high for many signals</td><td>Lower wiring cost for many signals</td></tr>
-<tr><td>Example</td><td>4–20 mA transmitter-to-controller loop</td><td>RS-485 Modbus RTU, Ethernet, Profibus, HART digital</td></tr></table></div>
+<tr><th>Parameter</th><th>Analog Transmission</th><th>Digital Transmission</th></tr>
+<tr><td><b>Signal Format</b></td><td>Continuous physical value (e.g., $4\text{ to }20\text{ mA}$ current).</td><td>Discrete coded binary pulses ($0\text{s and }1\text{s}$).</td></tr>
+<tr><td><b>Noise Immunity</b></td><td>Low: Line noise adds directly to the signal, causing measurement error.</td><td><b>Very High:</b> Noise does not alter bits unless large enough to flip a 1 to a 0; CRC checks detect errors.</td></tr>
+<tr><td><b>Channel Capacity</b></td><td>One signal per wire pair.</td><td>Dozens of sensor values multiplexed on a single cable.</td></tr>
+<tr><td><b>Example</b></td><td>$4\text{–}20\text{ mA}$ RTD temperature transmitter loop.</td><td>RS-485 Modbus RTU or Industrial Ethernet.</td></tr>
+</table>
+</div>
 
-<div class="qa a" id="a3-3"><div class="qhead"><h3>Explain process control network / list the key functions of a process control network.</h3><span class="marks">3 marks</span></div>
+<div class="qa a" id="a3-3">
+<div class="qhead"><h3>Explain Process Control Network / List key functions of a process control network.</h3><span class="marks">3 marks</span></div>
 <div class="tags"><span class="tag">Jun 2023 · Q5</span><span class="tag">Apr 2025 · Q6</span></div>
-<p>A process control network is a combination of hardware (sensors, PLCs, actuators, HMIs, communication media and switches) and software used to monitor and control industrial processes such as chemical production or power generation. Its primary goal is to ensure the <b>safe and efficient operation</b> of critical infrastructure and so it needs strict control over data flow and access, to prevent unauthorised use and cyber-attacks. It is normally <b>isolated from the corporate IT network and the Internet</b> (or separated by firewalls/DMZ) to prevent external threats compromising its integrity.</p>
-<p><b>Key functions:</b> (1) collecting real-time data from field devices; (2) transmitting control commands from controllers to actuators; (3) enabling operator supervision, alarms and trends; (4) device configuration and diagnostics; (5) data exchange with historians, SCADA and business systems; and (6) maintaining reliable, deterministic, secure communication with redundancy.</p></div>
+<p>A Process Control Network is a specialised industrial communication network connecting sensors, PLCs, DCS controllers, HMIs, and actuators across a manufacturing facility.</p>
+<p><b>Key Functions:</b></p>
+<ol>
+<li><b>Real-Time Data Collection:</b> Gathers measurements from field sensors with guaranteed deterministic response time.</li>
+<li><b>Command Transmission:</b> Sends control outputs and safety interlock signals to final control actuators.</li>
+<li><b>Operator Supervision:</b> Feeds real-time variables, alarm states, and trend graphs to HMI workstations.</li>
+<li><b>Remote Diagnostics & Configuration:</b> Enables smart instrument calibration and status checks over the digital bus.</li>
+<li><b>Cybersecurity & Isolation:</b> Strictly isolates critical automation networks from corporate IT networks to prevent cyber attacks.</li>
+</ol>
+</div>
 
-<h2 id="partB">Part 3 · Part B – Long Answers</h2>
-
-<div class="qa" id="b3-1"><div class="qhead"><h3>Q. Explain fibre-optic data transmission.</h3><span class="marks">8 marks</span></div>
-<div class="tags"><span class="tag">Jun 2023 · Q15(a)</span><span class="tag">Apr 2026 · Q15(a)</span></div>
-<p>Fibre-optic data transmission is the process of sending information as modulated light through a thin glass or plastic fibre. The system comprises an optical transmitter, the optical fibre, (optional repeaters/couplers) and an optical receiver.</p>
-<pre class="fig">
- Electrical     +--------------+     +---------------------+     +--------------+    Electrical
- signal  -----&gt; | LED / Laser  |====&gt;| Optical fibre       |====&gt;| Photodetector|---&gt; signal
- (data)         | + driver     |     | core | cladding     |     | PIN/APD + amp|
-                +--------------+     +---------------------+     +--------------+
-                  Transmitter          Total internal reflection         Receiver
-</pre>
-<p><b>Transmitter.</b> The electrical data is applied to a driver circuit that modulates the intensity of an LED (850 or 1300 nm, low cost, short links, multimode fibre) or a laser diode (1310/1550 nm, higher power, narrow line width, long links, single-mode fibre). <b>Fibre.</b> It consists of a high-index core (8–9 µm for single-mode; 50 or 62.5 µm for multimode), a lower-index cladding (125 µm overall) and a protective buffer/jacket. Light entering within the acceptance angle ($\text{NA}=\sqrt{n_1^{2}-n_2^{2}}$) undergoes repeated <b>total internal reflection</b> at the core–cladding interface (critical angle $\theta_c=\sin^{-1}(n_2/n_1)$) and travels along the fibre. Fibres are step-index multimode (large dispersion, short distance), graded-index multimode (reduced modal dispersion) and single-mode (lowest dispersion and attenuation; used for long distance and high speed). Signal power decreases as it propagates by $P_{out}=P_{in}\,10^{-\alpha L/10}$ ($\alpha$ in dB/km), and dispersion broadens pulses, limiting bit rate; repeaters or optical amplifiers regenerate the signal. <b>Receiver.</b> A PIN photodiode or avalanche photodiode converts the light into a photocurrent, which is amplified (transimpedance amplifier) and passed through a comparator to recover digital data.</p>
-<p>In industry, fibre is used for plant backbone networks, communication in electrically noisy areas (near drives, welders, high-voltage substations), in explosive atmospheres, and for long cable runs between control room and remote I/O. <b>Advantages:</b> immunity from EMI/RFI and lightning, very wide bandwidth (Gbps), low loss, electrical isolation (no ground loops), small size and light weight, security, no sparks. <b>Disadvantages:</b> costly terminal equipment, specialised splicing, fragile, bending loss, needs electro-optical conversion.</p></div>
-
-<div class="qa" id="b3-2"><div class="qhead"><h3>Q. Explain pneumatic transmission.</h3><span class="marks">8 marks</span></div>
-<div class="tags"><span class="tag">Jun 2023 · Q16(a)</span></div>
-<p>Pneumatic transmission is a method of transmitting process information, over a distance, by the pressure of compressed air within a tube. The standard signal range is <b>3–15 psi</b> (0.2–1.0 bar, 20–100 kPa), where 3 psi represents 0 % of the measured range and 15 psi represents 100 %. The live zero allows detection of leaks or tube failures, and helps in overcoming friction and dead-band.</p>
-<pre class="fig">
-   Supply air 20 psi
-        |
-      [Restrictor]----+----&gt; to relay (booster) --&gt; 3-15 psi output signal
-                      |
-                  [Nozzle]  &lt;-- gap controlled by --  [Flapper] &lt;-- bellows / force beam &lt;-- measured variable
-</pre>
-<p><b>Working (flapper–nozzle transmitter).</b> Clean, dry, regulated air at about 20 psi passes through a fixed restriction (orifice) to a nozzle. A flapper, positioned by the measured variable through a bellows, diaphragm or a force-balance beam, covers the nozzle. When the flapper is close to the nozzle, air escape is reduced, so back-pressure rises toward the supply pressure; when it moves away, the back-pressure falls. Hence the nozzle back-pressure $P_b$ is a non-linear but monotonic function of the flapper gap, which is made nearly linear over a small range (about 0.001 inch). Since the back-pressure has very small air flow capacity, a <b>pneumatic relay/booster</b> amplifies the volume flow and delivers the standard 3–15 psi signal through the transmission tubing to the controller (a similar nozzle–flapper unit) or to a valve actuator. A <b>force-balance or feedback bellows</b> is used to linearise the output and reduce the motion required.</p>
-<p>The transmission lag arises from the resistance $R$ of the tube and the capacitance $C$ of the air volume, so a tube of length $L$ behaves like a first-order lag with $\tau=RC$, increasing roughly with $L^{2}$; typical practical limit is about 100–300 m (longer with relays). <b>Advantages:</b> intrinsically safe (no electric spark) for hazardous areas, simple, robust, inexpensive, easily maintained, and compatible with pneumatic control valves. <b>Disadvantages:</b> time lag and limited distance, need for clean dry air supply, leaks, low accuracy and slow response, difficulty in interfacing with computers (needs I/P and P/I converters), and tubing is bulkier than wire.</p></div>
-
-<div class="qa" id="b3-3"><div class="qhead"><h3>Q. Compare radio and wireless communication.</h3><span class="marks">6 marks</span></div>
-<div class="tags"><span class="tag">Jun 2023 · Q15(b)</span><span class="tag">Apr 2025 · Q15(a)</span></div>
-<p>Radio communication transmits information using radio-frequency electromagnetic waves between a transmitter and receiver, typically as point-to-point or broadcast links, whereas the term wireless communication covers all kinds of transmission without a physical conductor – radio, microwave, infrared, satellite, Wi-Fi, Bluetooth, ZigBee and cellular networks. Radio is therefore one of the technologies of wireless communication. In industrial use, radio telemetry (VHF/UHF) is used to link remote RTUs with a master station, while wireless networks (WLAN, WirelessHART, ISA100.11a) connect large numbers of field sensors and mobile devices.</p>
-<table>
-<tr><th>Sl.</th><th>Radio communication</th><th>Wireless communication</th></tr>
-<tr><td>1</td><td>Uses radio waves (3 kHz – 300 GHz) only</td><td>Uses radio, microwave, infrared, light, satellite and cellular</td></tr>
-<tr><td>2</td><td>Mainly point-to-point/broadcast with dedicated radios</td><td>Network-based: mesh, star, ad hoc; many nodes</td></tr>
-<tr><td>3</td><td>Long distance with line-of-sight (tens of km), low data rate</td><td>Range from metres (Bluetooth) to global (satellite); data rate up to Gbps</td></tr>
-<tr><td>4</td><td>Often licensed bands; needs a licence and frequency planning</td><td>Often licence-free ISM bands (2.4/5 GHz) for LAN/PAN</td></tr>
-<tr><td>5</td><td>Simple proprietary or serial protocols (Modbus over radio)</td><td>Standardised protocols with addressing, error control and security (IEEE 802.11, 802.15.4)</td></tr>
-<tr><td>6</td><td>Used for SCADA telemetry, two-way radios, broadcasting</td><td>Used for Wi-Fi HMIs, wireless sensors, IoT, mobile phones</td></tr>
-<tr><td>7</td><td>Subject to path loss, fading and interference; limited security</td><td>Offers encryption (WPA2/3), frequency hopping, and redundancy through mesh routing</td></tr></table></div>
-
-<div class="qa" id="b3-4"><div class="qhead"><h3>Q. List the advantages of wireless communication.</h3><span class="marks">4 marks</span></div>
-<div class="tags"><span class="tag">Apr 2026 · Q16(b)</span></div>
-<p>Wireless communication replaces cables with radio links, which offers several advantages for industrial automation. (1) <b>Reduced installation cost and time</b> – no cable trenching, conduits and cable trays; very important in large, remote or already-built plants. (2) <b>Access to difficult or hazardous locations</b> – rotating machines, mobile vehicles, remote tanks, pipelines, offshore sites. (3) <b>Mobility and flexibility</b> – operators with tablets can receive data from anywhere; instruments can be relocated easily; networks are quickly expandable. (4) <b>Immunity to cable faults</b> such as breaks, corrosion, ground loops and lightning-induced damage, and low maintenance. (5) <b>Scalability</b> with mesh networks adding self-healing paths and redundancy. (6) <b>Rapid deployment for temporary or trial measurements</b> and lower cost for monitoring of non-critical points that previously were not economical to wire. (7) Support of advanced applications such as asset monitoring, predictive maintenance and the Industrial IoT. Limitations include interference, finite battery life of nodes, and cybersecurity concerns.</p></div>
-
-<div class="qa" id="b3-5"><div class="qhead"><h3>Q. Explain the architecture of a virtual instrumentation system with block diagram.</h3><span class="marks">8 – 10 marks</span></div>
-<div class="tags"><span class="tag">May 2024 · Q15(a) (10)</span><span class="tag">Apr 2025 · Q15(b) (8)</span><span class="tag">Apr 2026 · Q16(a) (10)</span><span class="tag syl">Model Q15(a)</span></div>
-<p>A virtual instrument is a system in which a general-purpose computer, together with modular measurement hardware and graphical software, takes over the functions of a conventional instrument. Its architecture can be seen as a chain from the physical world to the user.</p>
-<pre class="fig">
- PHYSICAL      +-------------+    +---------------+    +----------------+    +------------------------+
- WORLD   ----&gt; |  SENSORS    |---&gt;| SIGNAL        |---&gt;| DAQ HARDWARE   |---&gt;|  PERSONAL COMPUTER     |
- (temp,        | transducers |    | CONDITIONING  |    | MUX, S/H, ADC  |    |  +------------------+  |
- pressure,     +-------------+    | amp, filter,  |    | DAC, DIO, timer|    |  | Driver software  |  |
- flow...)  &lt;----  ACTUATORS &lt;-----| isolation     |&lt;---|  (PCI/USB/PXI) |&lt;---|  +------------------+  |
-                                  +---------------+    +----------------+    |  | Application s/w  |  |
-                                                                             |  | (LabVIEW) : front|  |
-                                                                             |  | panel + diagram  |  |
-                                                                             |  +------------------+  |
-                                                                             +-----------+------------+
-                                                                       Display / storage / network / printer
-</pre>
-<p><b>1. Sensors and transducers</b> convert the physical quantity (temperature, pressure, strain, speed…) to an electrical signal; actuators carry the control signals back to the process. <b>2. Signal conditioning</b> – amplification (to match the ADC range), filtering (anti-aliasing), linearisation, isolation, cold-junction compensation, excitation for bridges. <b>3. DAQ hardware</b> – a multiplexer selects among channels; a sample-and-hold circuit freezes the value; the ADC converts it into a number of resolution $n$ bits, so the smallest step is $V_{FS}/2^{n}$; sampling must satisfy $f_s\ge 2f_{max}$ (Nyquist). DAQ cards also contain D/A converters for outputs, digital I/O for switches and relays, and counters/timers. They are connected to the PC via PCI, PCIe, USB, Ethernet or PXI backplanes; for instruments GPIB, RS-232 and VXI interfaces exist. <b>4. Computer</b> – the processor, memory, hard disk, display and network connection supply the computing power. <b>5. Driver software</b> (NI-DAQmx, VISA, IVI) hides the hardware details and gives standard function calls. <b>6. Application software</b> – LabVIEW/LabWindows/Visual Basic – defines the front panel and the program logic: acquisition, processing (FFT, filtering, statistics, PID control), display, data logging and communication with databases, web or other instruments. The VI has a <b>front panel</b> (the user interface with controls and indicators that emulate a physical instrument panel) and a <b>block diagram</b> (graphical code), enabling the user to build a custom instrument quickly. Because hardware is generic, a multimeter, an oscilloscope, a spectrum analyser and a data logger can all be implemented on the same hardware just by changing the software.</p></div>
-
-<div class="qa" id="b3-6"><div class="qhead"><h3>Q. Compare virtual instruments with traditional instruments.</h3><span class="marks">6 marks</span></div>
-<div class="tags"><span class="tag">Apr 2026 · Q15(b)</span><span class="tag syl">Syllabus topic</span></div>
-<p>Traditional instruments are stand-alone boxes (oscilloscope, multimeter, signal generator) in which the measurement, processing and display functions are fixed by the manufacturer in dedicated hardware and a front panel, while a virtual instrument uses a standard PC and plug-in hardware, with the functions defined by the user's software. The differences are summarised below.</p>
-<table>
-<tr><th>Point</th><th>Traditional instrument</th><th>Virtual instrument</th></tr>
-<tr><td>Who defines the functionality?</td><td>The manufacturer (fixed)</td><td>The user (software)</td></tr>
-<tr><td>Architecture</td><td>Hardware-centred, closed, dedicated</td><td>PC + DAQ + software, open, modular</td></tr>
-<tr><td>Cost</td><td>High cost per instrument</td><td>Low overall cost; multiple instruments on one platform</td></tr>
-<tr><td>Flexibility and upgrade</td><td>Hard to change; new model needed</td><td>Software modification or upgrade</td></tr>
-<tr><td>Processing and display</td><td>Limited, vendor-defined</td><td>Powerful PC analysis; customised, large displays</td></tr>
-<tr><td>Data storage and sharing</td><td>Limited; manual notes/printer</td><td>Automatic logging, database, networking, web</td></tr>
-<tr><td>Connectivity</td><td>Standalone, GPIB optional</td><td>Easily connected to LAN, Internet, other instruments</td></tr>
-<tr><td>Size</td><td>Bulky</td><td>Compact and portable</td></tr>
-<tr><td>Development time/skill</td><td>Not applicable (vendor design)</td><td>Short with graphical programming</td></tr>
-<tr><td>Obsolescence</td><td>Fixed life</td><td>Follows PC technology curve; extends life by software</td></tr></table></div>
-
-<div class="qa" id="b3-7"><div class="qhead"><h3>Q. Explain the concepts and key features of graphical programming / Compare graphical programming with sequential programming.</h3><span class="marks">4 – 8 marks</span></div>
-<div class="tags"><span class="tag">May 2024 · Q16(a) (8)</span><span class="tag">Apr 2025 · Q16(b) (7)</span><span class="tag syl">Model Q15(b)</span></div>
-<p><b>Concept.</b> Graphical programming is a way of writing programs by drawing instead of typing. In LabVIEW's "G" language the programmer builds a <b>block diagram</b> from icons representing functions (arithmetic, DAQ, analysis, file I/O), structures and sub-VIs, and connects them with <b>wires</b> which carry data of particular types (colour-coded, e.g. orange for floating-point numbers, green for Booleans, pink for strings). A <b>front panel</b> with controls (inputs) and indicators (outputs) forms the user interface. Execution follows <b>dataflow</b>: a node executes only when data is available at all its inputs, and it passes its results to the next node when finished. Unlike text languages there is no line-by-line order; therefore, parallel branches execute concurrently, giving natural multitasking and multi-threading.</p>
-<p><b>Key features.</b> (1) Intuitive, visual, drag-and-drop development and quick learning for engineers; (2) built-in libraries for acquisition, instrument control, signal analysis, mathematics and communication; (3) structures – For/While loops, Case, Sequence, Event structures; shift registers and local variables; (4) hierarchical modularity through sub-VIs; (5) automatic parallelism and memory management; (6) integrated debugging with execution highlighting, probes and breakpoints; (7) shorter development time and easy interface creation; (8) ability to call text-based code and to compile to real-time or FPGA targets.</p>
-<h4>Comparison with sequential (text-based) programming</h4>
-<table>
-<tr><th>Graphical (dataflow)</th><th>Sequential (text-based, e.g. C)</th></tr>
-<tr><td>Code is made by connecting icons with wires</td><td>Code is typed as statements</td></tr>
-<tr><td>Execution determined by data availability; parallel nodes run simultaneously</td><td>Execution line-by-line in order written (control flow)</td></tr>
-<tr><td>Syntax errors rare – broken wire shown visually</td><td>Syntax errors require compiling and rewriting</td></tr>
-<tr><td>Easy front-panel (GUI) building; fast prototyping</td><td>GUI requires additional libraries and long code</td></tr>
-<tr><td>Excellent for measurement, test automation, DAQ, control</td><td>General-purpose, better for complex algorithms, embedded and system software</td></tr>
-<tr><td>Large diagrams can be cluttered (“spaghetti”)</td><td>Compact for complex logic and mathematics</td></tr></table>
-<p><b>Where employed:</b> data acquisition and test and measurement, laboratory automation, industrial monitoring and control, research and education, embedded/FPGA control, and machine vision.</p></div>
-
-<div class="qa" id="b3-8"><div class="qhead"><h3>Q. Discuss process control networks used in industries / explain different types of communication networks used for data collection and control.</h3><span class="marks">6 – 7 marks</span></div>
-<div class="tags"><span class="tag">Apr 2025 · Q16(a) (7)</span><span class="tag">May 2024 · Q15(b) (functions, 4) &amp; Q16(b) (two networks, 6)</span><span class="tag syl">Model Q16(a)</span></div>
-<p>A process control network connects the various levels of automation in an industry so that data collected from field devices can be used for control and supervision, and so that control commands can be sent back. The networks form a <b>hierarchy</b>:</p>
-<pre class="fig">
- Enterprise level  : Ethernet / TCP-IP  (ERP, MES, historian)
- Supervisory level : SCADA / DCS operator stations  -- Ethernet, OPC
- Control level     : PLC / DCS controllers          -- Control network (Ethernet/IP, Profinet, Modbus TCP)
- Field level       : Sensors, transmitters, valves  -- 4-20 mA / HART / Fieldbus / Profibus / AS-i
-</pre>
-<p><b>Functions</b> (answer for five-function question): (1) real-time data acquisition from field devices; (2) transmitting control commands to actuators; (3) operator supervision – displays, alarms, trending; (4) device configuration, calibration and diagnostics; (5) data exchange with historians and enterprise systems; (6) time synchronisation and sequence-of-event recording; (7) redundancy and security.</p>
-<p><b>Types of networks used:</b></p>
+<div class="qa a" id="a3-4">
+<div class="qhead"><h3>How does Profibus help in industrial data communication? / Compare Profibus and Fieldbus.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q6</span><span class="tag syl">Model Paper Q5</span></div>
+<p><b>Profibus (Process Field Bus)</b> provides a standardised, high-speed open communication network (IEC 61158) that replaces expensive multi-conductor cabling with a single 2-wire serial bus.</p>
 <ul>
-<li><b>Point-to-point analog (4–20 mA, HART):</b> each device is wired to the controller on its own pair; HART superimposes digital data (FSK at 1200/2200 Hz) on the analog signal for configuration and diagnostics.</li>
-<li><b>Fieldbus (Foundation Fieldbus H1, Profibus-PA, DeviceNet, CAN):</b> multi-drop digital bus connecting several field devices over a single cable; reduces wiring and enables distributed control and diagnostics. Foundation Fieldbus H1 runs at 31.25 kbit/s.</li>
-<li><b>Profibus-DP / Modbus (RS-485):</b> master–slave polling between PLCs and remote I/O and drives, up to 12 Mbit/s on Profibus-DP; Modbus RTU at typically 9.6–115 kbit/s.</li>
-<li><b>Industrial Ethernet (Ethernet/IP, Profinet, Modbus TCP):</b> high-speed (100 Mbit/s–1 Gbit/s) network between PLCs, HMIs, SCADA and corporate systems, with switches and redundant rings.</li>
-<li><b>Wireless networks (WirelessHART, ISA100, Wi-Fi, radio modems):</b> for remote or mobile devices where wiring is costly.</li>
+<li><b>Profibus-DP (Decentralised Peripherals):</b> High speed (up to $12\text{ Mbps}$) over RS-485 for factory automation, linking PLCs to remote I/O racks, drives, and valves using master-slave polling.</li>
+<li><b>Profibus-PA (Process Automation):</b> Runs at $31.25\text{ kbps}$ with bus power over intrinsically safe media for hazardous process areas.</li>
 </ul>
-<p>The general network <b>characteristics</b> are deterministic response, noise immunity, redundancy, scalability, interoperability by open standards, security (segmentation with firewalls so that the control network is isolated from the Internet), and intrinsic safety. Topologies used are bus (fieldbus), star (switched Ethernet), ring (redundant Ethernet) and tree.</p></div>
+<p><b>Comparison:</b> Profibus excels in high-speed discrete manufacturing and drives using cyclic master-slave polling; Foundation Fieldbus H1 excels in process plants by executing distributed PID control blocks directly inside field devices.</p>
+</div>
 
-<div class="qa" id="b3-9"><div class="qhead"><h3>Q. Explain Fieldbus / How does Profibus help in industrial data communication? / Compare Profibus and Fieldbus.</h3><span class="marks">3 – 4 marks</span></div>
-<div class="tags"><span class="tag">May 2024 · Q6</span><span class="tag syl">Model paper Q5 & Q16(b)</span></div>
-<p><b>Fieldbus</b> is a digital, bi-directional, multi-drop communication network that connects field devices – transmitters, valves, drives – with controllers in place of individual 4–20 mA wires. All devices share the same cable, which also supplies power and (with suitable barriers) enables intrinsic safety. The devices contain microprocessors, so they send not only the process value but also status, diagnostics and configuration data, and can execute control function blocks (PID) themselves, giving control in the field. Foundation Fieldbus H1 works at 31.25 kbit/s on up to 1900 m with 32 devices per segment.</p>
-<p><b>Profibus</b> helps industrial data communication by providing a standardised (IEC 61158) high-speed serial bus: <i>Profibus-DP</i> (up to 12 Mbit/s, RS-485) links PLCs to distributed I/O, drives and sensors in factory automation with cyclic master–slave polling and token passing among masters; <i>Profibus-PA</i> (31.25 kbit/s, intrinsically safe) is used for process instruments; <i>Profibus-FMS</i> for cell-level communication. Its advantages are reduced wiring, fast deterministic response, vendor interoperability, simple diagnostics, and hot-swapping of devices.</p>
-<table><tr><th>Profibus</th><th>Foundation Fieldbus</th></tr>
-<tr><td>Master–slave with token passing, cyclic polling</td><td>Scheduled and unscheduled communication, publisher–subscriber</td></tr>
-<tr><td>DP up to 12 Mbit/s; PA 31.25 kbit/s</td><td>H1 31.25 kbit/s; HSE 100 Mbit/s</td></tr>
-<tr><td>Strong in factory automation and drives</td><td>Strong in process industry with control in the field</td></tr>
-<tr><td>Up to 126 stations</td><td>32 devices per segment (H1)</td></tr></table></div>
+<!-- ===================== PART B ===================== -->
+<h2 id="partB">Part 3 · Part B – Long Answers (4 – 10 marks)</h2>
+
+<div class="qa" id="b3-1">
+<div class="qhead"><h3>Q. Explain fibre-optic data transmission with a neat diagram.</h3><span class="marks">8 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q15(a)</span><span class="tag">Apr 2026 · Q15(a)</span></div>
+
+<h4>1. System Block Diagram</h4>
+<pre class="fig">
+ Electrical       +---------------+     Modulated Light     +-------------------------+     Light     +---------------+     Electrical
+ Data In =======> | LED / Laser   |========================>| Core (n1) | Cladding(n2)|==============>| PIN Photodiode|=====> Data Out
+                  | Driver Source |                         +-------------------------+               | or APD + Amp  |
+                  +---------------+                              OPTICAL FIBRE CABLE                  +---------------+
+                    TRANSMITTER                               Total Internal Reflection                   RECEIVER
+</pre>
+
+<h4>2. Detailed Functional Blocks</h4>
+<ol>
+<li><b>Optical Transmitter:</b> Converts electrical voltage pulses into optical light pulses.
+  <ul>
+    <li><b>LED (Light Emitting Diode):</b> Inexpensive, rugged, wide spectral width, used for short-range multimode links ($850\text{–}1300\text{ nm}$).</li>
+    <li><b>Laser Diode (LD):</b> High power, coherent narrow beam, fast switching ($>1\text{ Gbps}$), used for long-distance single-mode links ($1310\text{–}1550\text{ nm}$).</li>
+  </ul>
+</li>
+<li><b>Optical Fibre Cable:</b> Consists of an inner glass core (refractive index $n_1$) surrounded by an outer glass cladding (refractive index $n_2$). Since $n_1 > n_2$, light entering within the acceptance angle experiences <b>Total Internal Reflection (TIR)</b>:
+$$ \text{Critical Angle: } \theta_c = \sin^{-1}\!\left(\frac{n_2}{n_1}\right), \qquad \text{Numerical Aperture: } \text{NA} = \sqrt{n_1^2 - n_2^2} $$
+</li>
+<li><b>Optical Receiver:</b> Detects incoming light photons and converts them back to electrical current via photoelectric effect using a <b>PIN Photodiode</b> or an <b>Avalanche Photodiode (APD)</b>, followed by a transimpedance amplifier and pulse shaper.</li>
+</ol>
+
+<h4>3. Industrial Advantages & Disadvantages</h4>
+<ul>
+<li><b>Advantages:</b> $100\%$ immune to electromagnetic interference (EMI), radio frequency interference (RFI), and high-voltage surges; no spark hazard in explosive oil/gas zones; enormous bandwidth; ultra-low signal attenuation ($0.2\text{ dB/km}$); galvanic isolation eliminates ground loops.</li>
+<li><b>Disadvantages:</b> Higher cost of electro-optical transceivers; fragile glass cores require careful installation; specialised fusion splicing equipment needed for repairs.</li>
+</ul>
+</div>
+
+<div class="qa" id="b3-2">
+<div class="qhead"><h3>Q. Explain pneumatic data transmission with neat sketch.</h3><span class="marks">8 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q16(a)</span></div>
+<p>Pneumatic transmission represents process measurements as proportional air pressures ($3\text{ to }15\text{ psi}$) conveyed through small-bore copper or nylon tubing.</p>
+<pre class="fig">
+  Supply Air 20 psi
+        |
+  [ Restrictor Orifice ]-----+-----> To Pneumatic Booster Relay =====> 3 - 15 psi Output Signal
+                             |
+                         [ Nozzle ] <==== Variable Gap x Controlled by Sensor (Flapper)
+</pre>
+<h4>Working Principle (Flapper-Nozzle System)</h4>
+<ol>
+<li>Clean, regulated dry air at $20\text{ psi}$ ($1.4\text{ bar}$) flows through a fixed restrictor orifice to an open nozzle.</li>
+<li>A movable metal leaf (the <b>flapper</b>), positioned by the primary sensor (bellows, Bourdon tube, or diaphragm), covers the nozzle opening.</li>
+<li><b>When measured variable increases:</b> Flapper moves closer to the nozzle $\implies$ air escape is throttled $\implies$ back-pressure inside the nozzle chamber rapidly rises.</li>
+<li><b>When measured variable decreases:</b> Flapper moves away $\implies$ air escapes freely $\implies$ back-pressure drops.</li>
+<li>A <b>Pneumatic Booster Relay</b> amplifies the small nozzle airflow volume to drive long field tubing with minimal lag. A feedback bellows provides negative feedback to make output pressure strictly linear with flapper motion.</li>
+</ol>
+<p><b>Standard Calibration:</b> $0\%\text{ process value} = 3\text{ psi}$ ($20\text{ kPa}$), $100\%\text{ process value} = 15\text{ psi}$ ($100\text{ kPa}$). Live zero of $3\text{ psi}$ detects air line leaks.</p>
+</div>
+
+<div class="qa" id="b3-3">
+<div class="qhead"><h3>Q. Compare radio and wireless communication / List the advantages of wireless communication in industries.</h3><span class="marks">4 – 6 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q15(b)</span><span class="tag">Apr 2025 · Q15(a)</span><span class="tag">Apr 2026 · Q16(b)</span></div>
+
+<h4>1. Comparison: Radio vs Wireless Communication</h4>
+<table>
+<tr><th>Parameter</th><th>Radio Communication</th><th>Wireless Communication Networks</th></tr>
+<tr><td><b>Concept</b></td><td>Transmission via radio-frequency electromagnetic waves using dedicated RF modems.</td><td>Broad umbrella of wire-free networking standards (Wi-Fi, Bluetooth, WirelessHART, 5G).</td></tr>
+<tr><td><b>Topology</b></td><td>Rigid point-to-point or star broadcast.</td><td>Dynamic, self-healing <b>mesh networking</b>.</td></tr>
+<tr><td><b>Frequency Bands</b></td><td>Licensed VHF/UHF bands ($150\text{–}900\text{ MHz}$) requiring government permits.</td><td>Unlicensed international ISM bands ($2.4\text{ GHz}, 5\text{ GHz}$).</td></tr>
+<tr><td><b>Protocol</b></td><td>Proprietary serial or simple Modbus over RF.</td><td>Standardised layered stacks with 128-bit AES encryption.</td></tr>
+<tr><td><b>Application</b></td><td>Remote telemetry across long distances (dams, desert oil pipelines).</td><td>Plant-floor sensor networks, mobile tablet maintenance, rotating machinery.</td></tr>
+</table>
+
+<h4>2. Advantages of Wireless Communication in Industries</h4>
+<ol>
+<li><b>Massive Cost Savings:</b> Eliminates cable trays, trenching, conduit, and labour costs ($60\text{–}80\%$ savings).</li>
+<li><b>Access to Inaccessible Assets:</b> Enables monitoring of rotating kilns, moving cranes, vibrating centrifuges, and offshore platforms where cabling is impossible.</li>
+<li><b>High Mobility:</b> Field technicians use tablets running wireless HMIs to monitor and tune equipment directly at the machine side.</li>
+<li><b>Rapid Deployment & Scalability:</b> New sensors can be added to a wireless mesh network in minutes without laying a single metre of cable.</li>
+</ol>
+</div>
+
+<div class="qa" id="b3-4">
+<div class="qhead"><h3>Q. Explain the architecture of a Virtual Instrumentation (VI) system with a block diagram.</h3><span class="marks">8 – 10 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q15(a)</span><span class="tag">Apr 2025 · Q15(b)</span><span class="tag">Apr 2026 · Q16(a)</span><span class="tag syl">Model Paper Q15(a)</span></div>
+
+<h4>1. Architecture Block Diagram</h4>
+<pre class="fig">
+ [ PHYSICAL WORLD ]     +------------------+     +------------------+     +-------------------------------+
+ (Temperature,     ====>| SIGNAL           |====>| DAQ HARDWARE     |====>| PERSONAL COMPUTER (PC)        |
+  Pressure, Flow,       | CONDITIONING     |     | (PCI/USB/PXI)    |     |                               |
+  Vibration, Speed)     | (Amp, Filter,    |     | - Multiplexer    |     |  [ Driver Software: DAQmx ]   |
+                        |  Isolation,      |     | - S/H & ADC      |     |  [ Application: LabVIEW ]     |
+                        |  Bridge Circuit) |     | - DAC, DIO, Timer|     |    - Front Panel (GUI)        |
+                        +------------------+     +------------------+     |    - Block Diagram (G-code)   |
+                                                                          +---------------+---------------+
+                                                                                          |
+                                                                              Display / Storage / Network
+</pre>
+
+<h4>2. Detailed Description of Each Block</h4>
+<ol>
+<li><b>Sensors & Transducers:</b> Detect the physical process variable (e.g., thermocouple for temperature, strain gauge for force) and produce raw electrical signals.</li>
+<li><b>Signal Conditioning Module:</b> Amplifies microvolt signals, strips high-frequency noise via anti-aliasing filters, provides galvanic isolation, and supplies bridge excitation.</li>
+<li><b>Data Acquisition (DAQ) Hardware:</b> Plug-in card (PCIe, USB, or PXI module) containing:
+  <ul>
+    <li><b>Multiplexer (MUX):</b> Allows multiple sensor channels to share one ADC.</li>
+    <li><b>Sample-and-Hold (S/H):</b> Freezes the analog voltage during conversion.</li>
+    <li><b>Analog-to-Digital Converter (ADC):</b> Converts analog voltage into $n$-bit digital numbers ($\text{Resolution} = V_{FS}/2^n$). Sampling rate must satisfy Nyquist criterion: $f_s \ge 2 f_{max}$.</li>
+    <li><b>DAC & Digital I/O:</b> Generates analog output voltages and digital on/off signals for control.</li>
+  </ul>
+</li>
+<li><b>Computer & Driver Software:</b> Standard PC running driver software (e.g., NI-DAQmx) that abstracts hardware into standard software function calls.</li>
+<li><b>Application Software (LabVIEW):</b> The core of the virtual instrument:
+  <ul>
+    <li><b>Front Panel:</b> The user interface mimicking a physical instrument panel with knobs, sliders, LED switches, and digital graphs.</li>
+    <li><b>Block Diagram:</b> The graphical source code where functional icons are wired together following the dataflow model.</li>
+  </ul>
+</li>
+</ol>
+</div>
+
+<div class="qa" id="b3-5">
+<div class="qhead"><h3>Q. Compare Virtual Instruments with Traditional Instruments.</h3><span class="marks">6 marks</span></div>
+<div class="tags"><span class="tag">Apr 2026 · Q15(b)</span></div>
+<table>
+<tr><th>Parameter</th><th>Traditional Stand-Alone Instrument</th><th>Virtual Instrument (VI)</th></tr>
+<tr><td><b>Functionality Definition</b></td><td>Fixed by the manufacturer inside dedicated hardware circuitry.</td><td><b>User-defined</b> in software; completely customisable.</td></tr>
+<tr><td><b>Hardware Architecture</b></td><td>Closed, proprietary, single-purpose metal box.</td><td>Open, modular, general-purpose PC + DAQ card.</td></tr>
+<tr><td><b>Cost per Function</b></td><td>High: buying an oscilloscope, DMM, and datalogger requires three separate instruments.</td><td><b>Low:</b> the same PC and DAQ card performs all functions by running different software.</td></tr>
+<tr><td><b>Upgradeability</b></td><td>Difficult: requires buying new hardware models.</td><td>Instant: simply update the software program.</td></tr>
+<tr><td><b>Data Processing & Display</b></td><td>Limited built-in microprocessor and small fixed screen.</td><td>Massive PC processor power (FFT, filtering) and high-resolution monitors.</td></tr>
+<tr><td><b>Data Storage & Networking</b></td><td>Very limited internal memory; manual pen/paper recording.</td><td>Automatic hard-drive logging, SQL databases, and cloud web connectivity.</td></tr>
+<tr><td><b>Portability & Footprint</b></td><td>Bulky, heavy benches of multiple instruments.</td><td>Compact: a single laptop with USB DAQ module.</td></tr>
+</table>
+</div>
+
+<div class="qa" id="b3-6">
+<div class="qhead"><h3>Q. Explain the concepts and key features of graphical programming / Compare with sequential programming.</h3><span class="marks">7 – 8 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q16(a)</span><span class="tag">Apr 2025 · Q16(b)</span><span class="tag syl">Model Paper Q15(b)</span></div>
+
+<h4>1. Core Concepts of Graphical Programming (LabVIEW "G")</h4>
+<ul>
+<li><b>Dataflow Execution:</b> Execution is governed entirely by the movement of data, not sequential line numbers. A node executes if and only if data is available at <b>all</b> its input terminals!</li>
+<li><b>Dual-Window Concept:</b>
+  <ul>
+    <li><b>Front Panel:</b> Represents the user interface with Controls (inputs) and Indicators (outputs).</li>
+    <li><b>Block Diagram:</b> Contains graphical nodes (functions, subVIs, loops) connected by colour-coded wires carrying data.</li>
+  </ul>
+</li>
+<li><b>Automatic Parallelism:</b> If two wires branch to independent function blocks, both blocks execute simultaneously in separate threads on multi-core processors without any complex programming!</li>
+</ul>
+
+<h4>2. Comparison: Graphical vs Sequential Programming</h4>
+<table>
+<tr><th>Feature</th><th>Graphical Programming (LabVIEW "G")</th><th>Sequential Text Programming (C / C++ / Python)</th></tr>
+<tr><td><b>Program Representation</b></td><td>Visual block diagram connecting icons with wires.</td><td>Textual statements and syntax lines.</td></tr>
+<tr><td><b>Execution Model</b></td><td><b>Dataflow:</b> Dependent nodes wait for incoming data; independent branches run in parallel.</td><td><b>Control Flow:</b> Statements execute strictly line-by-line in sequential order.</td></tr>
+<tr><td><b>Parallelism</b></td><td>Inherent, automatic multi-threading.</td><td>Requires manual thread creation, mutex locks, and semaphores.</td></tr>
+<tr><td><b>GUI Development</b></td><td>Built automatically as controls are placed on the front panel.</td><td>Requires coding separate GUI frameworks.</td></tr>
+<tr><td><b>Syntax Errors</b></td><td>Virtually non-existent; represented visually by broken wires.</td><td>Frequent compile-time syntax and typo errors.</td></tr>
+<tr><td><b>Primary Applications</b></td><td>Measurement, automated testing, DAQ, and instrument control.</td><td>Operating systems, system utilities, web backends, and complex abstract algorithms.</td></tr>
+</table>
+</div>
 
 </main></div>
 </body>
