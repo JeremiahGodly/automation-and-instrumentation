@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 5 – SCADA & DCS | EET468</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="script.js"></script>
+</head>
+<body>
+<div class="layout"><main>
+
+<h1 class="title">Module 5 · SCADA and DCS Systems</h1>
+<p class="lead">SCADA introduction, architecture and components · supervision and control · HMI, RTU, MTU and supervisory stations · IEC 60870-5-101 and DNP3 · DCS introduction, architecture and control modes · SCADA vs DCS.</p>
+
+<input id="search" class="search" placeholder="Search questions in this module (e.g. DNP3, RTU, DCS)…">
+
+<div class="toc"><b>Contents</b>
+<ul>
+<li><a href="#theory">Part 1 – Syllabus theory</a></li>
+<li><a href="#partA">Part 2 – Part A short answers</a></li>
+<li><a href="#partB">Part 3 – Part B long answers</a></li>
+</ul></div>
+
+<h2 id="theory">Part 1 · Syllabus Theory</h2>
+
+<div class="topic" id="t-scada">
+<h3>5.1 SCADA – introduction and common system components</h3>
+<p><b>SCADA</b> stands for <b>Supervisory Control And Data Acquisition</b>. It is a computer-based system used to <i>monitor and control geographically dispersed assets</i> – power transmission and distribution systems, oil and gas pipelines, water and wastewater networks, railway signalling – from a central location. SCADA gathers real-time data from remote field devices, transmits it to a central master station over communication links, displays it to operators in graphical form, logs it in a historian, raises alarms for abnormal conditions, and allows the operator to send supervisory commands (open a breaker, start a pump, change a set point) back to the field. In a SCADA system the real-time local control is done by the RTU/PLC at the site, and the SCADA master only provides <b>supervisory</b> control – this is important because the plant keeps functioning locally even if the communication link is lost.</p>
+<p><b>The common system components</b> are: (1) <b>Field instrumentation</b> – sensors and transmitters (level, flow, pressure, voltage, current) and actuators that interface with the process; (2) <b>Remote terminal units (RTUs) or PLCs</b> – field-site computers that collect the data from instruments, digitise it, and execute local control; (3) <b>Communication network</b> – the media (leased line, fibre, radio, microwave, GSM/GPRS, satellite, Ethernet) and protocols (Modbus, DNP3, IEC 60870-5-101/104) linking field sites to the control centre, including modems and gateways; (4) <b>Master terminal unit (MTU)</b> / SCADA server – the central computer that polls the RTUs, processes the data and issues commands; (5) <b>Human–machine interface (HMI)</b> – operator workstations with graphic displays, trends and alarms; (6) <b>Data historian / database</b> servers that log process data, and the engineering workstation for configuration; (7) <b>Supporting items</b> – power supplies, UPS, time synchronisation (GPS), and security devices (firewalls).</p>
+<h4>Supervision and control</h4>
+<p><b>Supervisory function:</b> monitoring of process values and states, alarm annunciation, trending and reporting, event recording (sequence-of-events), and calculations (totals, efficiency). <b>Control function:</b> remote commands to devices (on/off, open/close, raise/lower), and set-point changes to local controllers. Control may be <b>open-loop</b> (operator initiated) or automatic closed-loop at the RTU/PLC. Commands are protected by a <b>select-before-operate (SBO)</b> sequence to avoid wrong operations.</p>
+</div>
+
+<div class="topic" id="t-hmi">
+<h3>5.2 HMI, RTU, MTU and supervisory stations</h3>
+<p><b>Human–Machine Interface (HMI).</b> The HMI is the interface between the operator and the process. It presents process information on graphical displays – mimic/process diagrams with animated symbols, trend charts, alarm lists and reports – and lets the operator issue commands (start/stop, set point, mode changes) by mouse, keyboard or touch screen, and acknowledge alarms. It gives the operator real-time status, helps to recognise problems quickly, and enables corrective action. The HMI runs on operator workstations in the control centre or on local panels at the sites.</p>
+<p><b>Remote Terminal Unit (RTU).</b> An RTU is a microprocessor-based, ruggedised device installed at a remote site, which interfaces with the sensors and actuators. Its functions are: (i) acquire analog inputs (4–20 mA, 0–10 V) via ADC and digital status inputs (breaker open/closed, alarms), pulse counts; (ii) drive digital and analog outputs (relays, set-points) on command from the master; (iii) time-stamp events (SOE) and store them in a buffer; (iv) perform local processing and control (limit checks, simple PID, interlocks); (v) communicate with the master station using the SCADA protocol over a range of media, and often with multiple ports; (vi) diagnostics and operate in harsh environments from low power (solar/battery). Typical sites: oil and gas pipelines, water treatment plants, substations, and remote pumping stations. RTUs communicate using protocols such as Modbus, DNP3, IEC 60870-5-101/104 and IEC 61850.</p>
+<p><b>Master Terminal Unit (MTU) / Supervisory station.</b> The MTU or master station is the central computer (SCADA server) in the control centre. It <b>polls</b> the RTUs in a periodic cycle or receives their unsolicited reports, decodes the data, updates the real-time database, presents it through the HMI, archives it in the historian, generates alarms, executes supervisory commands and sends them to the RTUs, and may also interface to other computer systems (EMS/DMS, enterprise). It may be redundant (hot standby). <b>Supervisory stations</b> are the operator and engineering workstations connected to the MTU through a LAN, and their functions include: viewing and controlling the plant, alarm handling, trend/report generation, configuration of the database and displays, remote diagnostics, and system administration.</p>
+<pre class="fig">
+ FIELD SITE 1                   COMMUNICATION                    CONTROL CENTRE
+ sensors --+                                                     +--[HMI / Operator stations]
+ actuators-+--[ RTU / PLC ]--+                                   |
+                              |   radio / fibre / leased /       +--[Engineering workstation]
+ FIELD SITE 2                 +--- GSM / satellite / Ethernet ---+--[MTU / SCADA server]--[Historian]
+ sensors --+                  |   (Modbus, DNP3, IEC 101/104)    |
+ actuators-+--[ RTU / PLC ]--+                                   +--[Router/Firewall]--[Enterprise / ERP]
+</pre>
+</div>
+
+<div class="topic" id="t-protocol">
+<h3>5.3 SCADA communication protocols – IEC 60870-5-101 and DNP3</h3>
+<p>A <b>protocol</b> is a set of rules for the format, timing, sequencing and error control of messages exchanged between the master and the RTUs. Both protocols below were designed for SCADA and telecontrol over slow, noisy, low-bandwidth links, and use the <b>enhanced performance architecture (EPA)</b> – only three OSI layers: physical, data link and application.</p>
+<p><b>IEC 60870-5-101</b> (also called IEC 101) is the international standard for basic telecontrol communication in the electric power industry, used over serial links (RS-232/RS-485, radio). It supports <b>unbalanced</b> transmission (master initiates all exchanges, polling – multi-drop) and <b>balanced</b> transmission (either station can start, point-to-point). The link layer uses the FT 1.2 frame format (fixed or variable length, start/stop characters, checksum, even parity), and the application layer has <b>ASDUs</b> (application service data units) containing a type identification (e.g. single-point information, measured value, double command), cause of transmission (spontaneous, cyclic, interrogation, activation), common address and information-object addresses with optional <b>time tags</b> (CP24/CP56). Services: general interrogation, clock synchronisation, command transmission, spontaneous event reporting, and counter interrogation. Its TCP/IP version is IEC 60870-5-104. <b>Features:</b> international standard, interoperability, efficient event reporting, time-stamped events, widely applied in substations.</p>
+<p><b>DNP3 (Distributed Network Protocol version 3)</b> was developed by Westronic (Harris) in 1990 and is now IEEE 1815. It is a binary, layered, master–outstation protocol with <b>three layers</b> plus a pseudo-transport layer (data link – transport function – application). The master polls outstations (RTUs), which can also send <b>unsolicited responses</b> on events (report by exception), and data are organised in <b>classes</b>: Class 0 (static data – the current values), Classes 1, 2 and 3 (event data of high, medium and low priority). Data objects include binary inputs/outputs, analog inputs/outputs, counters, with <b>quality flags</b> and <b>time stamps</b>. The link layer uses 16-bit CRC for every block of 16 bytes of data, giving excellent <b>data integrity</b>; fragmentation of large messages is supported. Optional <b>Secure Authentication</b> (SAv5) gives security. It works over serial and TCP/UDP Ethernet, supports multi-level master–outstation hierarchies, time synchronisation, and is highly used in electric utilities, water, and oil &amp; gas. <b>Differences:</b> DNP3 is richer in features (event classes, unsolicited, data link confirmation) and common in North America, India and Australia, whereas IEC 101 is common in Europe and Asia in power systems.</p>
+</div>
+
+<div class="topic" id="t-dcs">
+<h3>5.4 DCS – introduction, architecture and control modes</h3>
+<p>A <b>Distributed Control System (DCS)</b> is a control system for a continuous or batch process in one plant (refinery, power station, chemical plant, paper mill) in which <i>control functions are distributed among many microprocessor-based controllers</i>, each handling a small part of the plant (a few loops), and all linked via a high-speed redundant communication network (data highway) to operator stations. The word "distributed" shows that control is spread over many nodes, so that failure of one controller affects only a small part of the plant, in contrast to a centralised computer control system with a single point of failure. DCS evolved in the 1970s (Honeywell TDC 2000, Yokogawa Centum) and now offers integrated control, alarms, historian and engineering tools.</p>
+<pre class="fig">
+ LEVEL 4  Plant / Business network:  ERP, MES, Historian server, Gateways (OPC)
+                       |
+ LEVEL 3  OPERATOR LEVEL:  [Operator station][Operator station][Engineering station][Historian]
+                       |==========  REDUNDANT DATA HIGHWAY (control network)  ==========|
+ LEVEL 2  CONTROL LEVEL :  [Controller 1 (redundant)] [Controller 2] [Controller 3] [PLC gateway]
+                       |   (PID, logic, sequence, calculations)
+ LEVEL 1  FIELD I/O LEVEL: [I/O modules]  [I/O modules]  [Fieldbus / HART / 4-20 mA]
+                       |
+ LEVEL 0  PROCESS:  sensors, transmitters, control valves, drives
+</pre>
+<p>The DCS architecture has these <b>components</b>: <b>(1) Field devices and I/O modules</b> – analog and digital input/output cards that connect the sensors and actuators, in local or remote I/O cabinets; <b>(2) Local control units / controllers</b> – the distributed microprocessor controllers (often redundant) executing control strategies (PID, ratio, cascade, logic and sequence) from function blocks stored in their memory; <b>(3) Data highway / communication network</b> – high-speed, redundant, deterministic (token-passing or Ethernet) network; <b>(4) Operator stations (HMI)</b> – workstations with graphic displays, alarms and trends; <b>(5) Engineering station</b> – for configuring control strategies, graphics and database; <b>(6) Historian/data server</b> and <b>gateways</b> to PLCs, other systems and business networks; <b>(7) Redundant power supplies.</b></p>
+<h4>Control modes in a DCS</h4>
+<p>Each control loop can be run in several modes: <b>Manual (MAN)</b> – the operator directly sets the controller output (valve position); the loop is open, used for start-up, shutdown or when the measurement fails. <b>Automatic (AUTO)</b> – the controller automatically calculates the output from the set point (local set point, entered by the operator) and measurement using the PID algorithm; <b>Cascade (CAS)</b> – the set point of a slave (inner) loop is provided by the output of a master (outer) loop, improving disturbance rejection, e.g. temperature master controlling steam flow slave; <b>Remote set point / Supervisory (RSP/SUP)</b> – the set point is supplied from a supervisory computer or another system; <b>Ratio</b> – set point is a fixed ratio of another flow; <b>Direct digital control (DDC)</b> – the digital controller directly drives the final element; <b>Feed-forward</b> and <b>override/selective</b> control are additional strategies. Bumpless transfer is provided when switching between modes so that the output does not jump.</p>
+</div>
+
+<h2 id="partA">Part 2 · Part A – Short Answers (3 marks)</h2>
+
+<div class="qa a" id="a5-1"><div class="qhead"><h3>Explain the role of RTU in SCADA communication. / What are the functions of RTU? / Describe an RTU and outline its functions.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q9 (as "MTU")</span><span class="tag">May 2024 · Q10</span><span class="tag">Apr 2025 · Q10</span><span class="tag">Apr 2026 · Q9</span></div>
+<p>A <b>Remote Terminal Unit (RTU)</b> is a rugged microprocessor-based device installed at a remote field site which interfaces the field instruments with the SCADA master station. RTUs are designed to operate in harsh environments and are typically installed in remote locations such as oil and gas pipelines, water treatment plants and power generation facilities. They collect data from a variety of analog and digital sensors – such as pressure, temperature, flow-rate and level sensors – and convert it to digital form. RTUs typically have multiple communication ports that allow them to connect to a variety of devices and networks, and use communication protocols such as Modbus, DNP3 and IEC 60870-5-101/104 to communicate with the central control system and other devices in the field.</p>
+<p><b>Functions:</b> (1) data acquisition (analog, digital, pulse inputs); (2) transmission of data to the master on poll or by exception; (3) executing remote control commands (outputs, set-points); (4) time-stamping of events and local buffering; (5) local control and alarm processing; (6) diagnostics and self-test. <i>Note:</i> the June 2023 key refers to the <b>MTU</b> (master terminal unit) – the central unit that polls RTUs, collects and processes their data, passes it to the HMI and sends commands back; it is described in 5.2 above.</p></div>
+
+<div class="qa a" id="a5-2"><div class="qhead"><h3>Explain the concept of Human Machine Interface (HMI) in DCS/SCADA.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q10</span><span class="tag">Apr 2026 · Q10</span></div>
+<p>The primary function of the HMI in a SCADA or DCS is to provide a <b>visual representation of the process</b> being monitored and controlled. This is typically done through graphical displays such as process (mimic) diagrams, trend charts and alarm screens. The HMI can also provide real-time status information, allowing operators to quickly identify issues and take corrective action. In addition to displaying process information, the HMI can also be used to <b>control the process</b>: operators use it to initiate control actions such as starting or stopping equipment, adjusting set points and changing control modes, and to acknowledge alarms and carry out corrective actions. HMIs range from simple local touch panels to multi-screen operator consoles with historian access, and may have security levels (user login) for authorised operations.</p></div>
+
+<div class="qa a" id="a5-3"><div class="qhead"><h3>Explain supervisory stations in SCADA and list their functions.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Apr 2025 · Q9</span></div>
+<p>A supervisory station (the master station) is the central computer or group of computers in the control centre of a SCADA system, which communicates with all the remote RTUs/PLCs, and provides the operators with a window into the whole process. <b>Functions:</b> (1) polling RTUs and receiving data (periodic and by exception); (2) maintaining the real-time database; (3) displaying the process on HMI screens (mimic, trends); (4) generation and handling of alarms and events; (5) sending supervisory control commands and set points to remote sites; (6) historical data archiving, reporting and analysis; (7) communication-link supervision and redundancy management; (8) interfacing to other systems (enterprise, EMS) and system security/administration.</p></div>
+
+<div class="qa a" id="a5-4"><div class="qhead"><h3>Mention three features of the DNP3 protocol.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q9</span></div>
+<ol><li><b>Data integrity:</b> CRC error detection on every data-link block (16 bits per 16 bytes) and message confirmations ensure reliable delivery on noisy lines.</li>
+<li><b>Event-based reporting with time stamps:</b> outstations can send unsolicited responses on events with time stamps and quality flags; data are grouped into classes 0–3 so that the master can poll for changes only; supports time synchronisation.</li>
+<li><b>Flexible and scalable layered design:</b> master–outstation architecture, multiple masters and multi-level hierarchies, working over serial or TCP/UDP, with optional authentication and encryption (Secure Authentication).</li></ol></div>
+
+<h2 id="partB">Part 3 · Part B – Long Answers</h2>
+
+<div class="qa" id="b5-1"><div class="qhead"><h3>Q. Explain the architecture of DCS / the components of DCS architecture for industrial process monitoring and control.</h3><span class="marks">7 – 10 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q19(a)</span><span class="tag">May 2024 · Q20(a)</span><span class="tag">Apr 2025 · Q20(a)</span><span class="tag">Apr 2026 · Q20(a) (10)</span><span class="tag syl">Model Q19(a)</span></div>
+<p>A distributed control system is a hierarchical system in which control is distributed among several microprocessor-based controllers, each assigned to a part of the plant, linked with each other and with operator stations by a high-speed communication network. The architecture is divided into levels:</p>
+<pre class="fig">
+                         +-------------------- PLANT / BUSINESS NETWORK (ERP, MES) ---------------------+
+                                              | (gateway / firewall)
+   +------------------+  +------------------+  +------------------+  +------------------+
+   | OPERATOR STATION |  | OPERATOR STATION |  | ENGINEERING STN  |  | HISTORIAN / SERVER|
+   +--------+---------+  +--------+---------+  +---------+--------+  +---------+--------+
+            |                     |                      |                      |
+ ===========+=====================+======================+======================+=========  DATA HIGHWAY (redundant)
+            |                     |                      |                      |
+   +--------+---------+  +--------+---------+  +---------+--------+   +---------+--------+
+   | CONTROLLER 1     |  | CONTROLLER 2     |  | CONTROLLER n     |   | PLC / GATEWAY    |
+   | (PID, logic,seq) |  | (redundant pair) |  |                  |   | to other systems |
+   +--------+---------+  +--------+---------+  +---------+--------+   +------------------+
+            | I/O bus             | I/O bus              | I/O bus
+   +--------+---------+  +--------+---------+  +---------+--------+
+   | I/O modules      |  | I/O modules      |  | Remote I/O       |
+   +--------+---------+  +--------+---------+  +---------+--------+
+   field instruments: transmitters, control valves, motors, switches  (PROCESS)
+</pre>
+<p><b>1. Field level (process interface).</b> Sensors, transmitters, control valves, drives and switches that are connected to the <b>I/O modules</b> (analog input/output, digital input/output, thermocouple/RTD cards) by 4–20 mA, HART or fieldbus. I/O modules may be local or remote (distributed) to reduce wiring cost.</p>
+<p><b>2. Control level – local control units / controllers.</b> Microprocessor-based controllers (also called process control units, multi-function controllers or field control stations) execute the regulatory control (PID, cascade, ratio, feed-forward), logic and sequential control, calculation and alarm functions using configured function blocks. They are often redundant (hot standby) so that failure of one does not interrupt control. Each controller handles typically 8–64 loops, so a failure affects only a small part of the plant – the central idea of "distribution".</p>
+<p><b>3. Communication network (data highway).</b> A high-speed, redundant, deterministic network (token-passing, or Ethernet-based) connects the controllers, operator stations, engineering and historian nodes. It transmits process data, set points, alarms and configuration data, with built-in error checking.</p>
+<p><b>4. Operator (supervisory) level – operator stations (HMI).</b> Workstations with colour graphics, faceplates, trend displays, alarm summaries and reports, through which the operator monitors the plant and changes set points, modes and outputs.</p>
+<p><b>5. Engineering station.</b> For configuring the control strategies, I/O database, graphics, and for maintenance, tuning, and documentation.</p>
+<p><b>6. Historian and gateways.</b> Collect and archive data for trend analysis; the gateways connect the DCS to PLCs, other DCS and the plant business network (via OPC, Modbus, Ethernet), with firewalls for security.</p>
+<p><b>7. Power supplies and redundancy.</b> Redundant power supplies, controllers, networks and I/O (optional) give high availability. The result is a robust, scalable and modular system giving integrated plant-wide monitoring, control, alarm management and information for continuous process industries.</p></div>
+
+<div class="qa" id="b5-2"><div class="qhead"><h3>Q. Explain the architecture of SCADA in process automation.</h3><span class="marks">7 – 10 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q19(a) (7)</span><span class="tag">Apr 2025 · Q19(a) (8)</span><span class="tag">Apr 2026 · Q19(a) (10)</span><span class="tag syl">Model Q20(b)</span></div>
+<p>The SCADA architecture follows a hierarchical, client–server model with three main parts: the <b>field (remote) level</b>, the <b>communication level</b> and the <b>control centre (master station) level</b>.</p>
+<pre class="fig">
+ +--------------------------------------------------------------------------------------------+
+ |  CONTROL CENTRE:   [HMI client 1] [HMI client 2] [Engineering WS]                          |
+ |                         \              |             /                                     |
+ |                        ---- LAN (Ethernet) ----------------[Historian / DB server]         |
+ |                                   |                                                         |
+ |                         [ MTU / SCADA master server (redundant) ]                           |
+ +----------------------------------+---------------------------------------------------------+
+                                    |   COMMUNICATION: radio / microwave / fibre / leased line / GSM / satellite
+        +---------------------------+---------------------------+      protocols: Modbus, DNP3, IEC 60870-5-101/104
+        |                           |                           |
+ +------+-------+           +-------+------+            +-------+------+
+ |  RTU / PLC 1 |           |  RTU / PLC 2 |            |  RTU / PLC n |   FIELD LEVEL (remote sites)
+ +--+-------+---+           +--+-------+---+            +--+-------+---+
+    |       |                  |       |                   |       |
+ sensors  actuators         sensors  actuators          sensors  actuators      PROCESS
+</pre>
+<p><b>(a) Field level.</b> At each remote location, field instruments – sensors, transmitters, switches, actuators and drives – are connected to an <b>RTU or PLC</b> which converts the signals to digital data, performs local control and interlocking, stores data when the link fails, and exchanges data with the master through its communication ports.</p>
+<p><b>(b) Communication system.</b> The medium and protocol linking sites to the control centre: leased lines or fibre (high reliability), licensed radio and microwave (remote sites), GSM/GPRS/4G, satellite VSAT, power-line carrier, or Ethernet WAN. Data are exchanged using SCADA protocols (Modbus, DNP3, IEC 60870-5-101/104) with polling or report-by-exception. Modems, routers, repeaters and firewalls are part of this layer.</p>
+<p><b>(c) Master station (control centre).</b> The <b>MTU / SCADA server</b> polls the RTUs, decodes the incoming data, updates the real-time database and processes alarms and events; <b>HMI clients</b> present the process graphically (mimics, alarms, trends) and let the operator issue supervisory commands; a <b>historian</b> database logs data for reporting and analysis; the <b>engineering workstation</b> is used for configuration of the database, displays and communication; and redundant servers provide high availability. The system may interface to the enterprise network (ERP/MES) via a firewall.</p>
+<p><b>Operation.</b> The MTU sends a poll to RTU-1; the RTU replies with the current values of analog and digital points (and events); the MTU updates the display; the operator, on seeing a low level in a reservoir, sends a "start pump" command which is routed through the communication link to the RTU, which then closes the contactor of the pump motor and returns the feedback. The architecture may be monolithic, distributed or networked (modern, Ethernet/Internet-based with open standards). <b>Applications:</b> power grid, oil/gas pipelines, water distribution, railway, and building management.</p></div>
+
+<div class="qa" id="b5-3"><div class="qhead"><h3>Q. What are the main components of SCADA?</h3><span class="marks">6 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q19(b)</span></div>
+<p>The main components of a SCADA system are as follows. <b>1. Field instrumentation:</b> sensors and transmitters that measure process variables, and actuators and final control elements that act on the process. <b>2. Remote Terminal Units (RTUs) and PLCs:</b> field devices that gather data from instruments, digitise it, execute local control, and communicate with the master. <b>3. Communication network:</b> the media and protocols – wired (fibre, leased line, Ethernet) or wireless (radio, microwave, GSM, satellite) – by which the field data move to the control centre and commands move out. <b>4. Master Terminal Unit (MTU)/SCADA server:</b> the central computer which polls RTUs, processes data, runs the SCADA software, handles alarms and issues commands. <b>5. Human–Machine Interface (HMI):</b> operator workstations giving graphical displays, trending, alarm lists and command functions. <b>6. Data historian / database:</b> logs real-time and event data for reporting and analysis. <b>7. Engineering workstation and software:</b> for configuring the database, graphics and communication. <b>8. Supporting systems:</b> power supply with UPS/battery, GPS time synchronisation, and cybersecurity devices (firewalls, VPN).</p></div>
+
+<div class="qa" id="b5-4"><div class="qhead"><h3>Q. Explain the advantages, disadvantages/limitations and applications of DCS.</h3><span class="marks">4 – 8 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q20(a) (8)</span><span class="tag">Apr 2026 · Q19(b) (4)</span></div>
+<h4>Advantages (3 marks)</h4>
+<ul>
+<li><b>Reliability and availability:</b> control is distributed, so failure of a single controller affects only a small part of the plant; redundant controllers, networks and power supplies add further availability.</li>
+<li><b>Modularity and scalability:</b> the system can be expanded by adding controllers and I/O without disturbing the existing system.</li>
+<li><b>Integrated operation:</b> a single, uniform interface for control, alarms, trends and historian; plant-wide information at the operator's fingertips.</li>
+<li><b>Reduced wiring and cost</b> through remote I/O and a digital data highway, and flexible configuration with function blocks, which is easy to modify.</li>
+<li><b>Advanced control and diagnostics:</b> cascade, ratio, feed-forward, batch and optimisation, along with self-diagnostics, easy troubleshooting and maintenance.</li>
+<li><b>Improved plant performance:</b> better product quality, safety and energy efficiency, with less operator effort.</li>
+</ul>
+<h4>Disadvantages / limitations (3 marks)</h4>
+<ul>
+<li><b>High initial cost</b> of hardware, software and engineering.</li>
+<li><b>Vendor dependence (proprietary)</b> – difficulty in integrating other vendors' equipment; lock-in for spares and support.</li>
+<li><b>Complexity:</b> requires skilled engineers for configuration and maintenance, and trained operators.</li>
+<li><b>Network dependency and cyber-security risk:</b> failure/attack on the data highway affects all nodes.</li>
+<li>Less suitable for small plants or for high-speed discrete/machine control, where PLCs are preferable.</li>
+</ul>
+<h4>Applications (2 marks)</h4>
+<p>Oil refineries and petrochemical plants, chemical and pharmaceutical plants, power generation (thermal, nuclear, hydro) boiler and turbine control, cement, steel, paper and pulp mills, water and wastewater treatment plants, food and beverage batch processing, and fertiliser plants.</p></div>
+
+<div class="qa" id="b5-5"><div class="qhead"><h3>Q. Explain the significance and features of the DNP3 protocol / DNP3 and IEC 60870-5-101 protocols used in SCADA systems.</h3><span class="marks">6 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q20(b)</span><span class="tag">Apr 2025 · Q20(b)</span><span class="tag syl">Model Q19(b)</span></div>
+<h4>DNP3 – significance</h4>
+<p>DNP3 (Distributed Network Protocol version 3) is a widely used protocol for communication between devices in SCADA systems. It was developed by the Westronic division of Harris Corporation in the 1990s and has since become an industry standard (IEEE 1815) for critical-infrastructure systems. It is a binary protocol using a master–slave (master–outstation) architecture, supports both serial and Ethernet communication, and is designed for harsh and noisy environments. It is used extensively in power generation and distribution, water and wastewater management and oil and gas pipelines, and is known for reliability and robustness in harsh environments.</p>
+<h4>DNP3 – features</h4>
+<ul>
+<li><b>Data integrity:</b> 16-bit CRCs, checksums and confirmations ensure the integrity of data between devices.</li>
+<li><b>Time synchronisation and time-stamped events:</b> accurate timestamps (ms resolution) for events – essential for sequence-of-events analysis.</li>
+<li><b>Scalability:</b> multi-level hierarchies (masters, sub-masters, outstations), allowing complex systems with multi-level control and supervision.</li>
+<li><b>Efficient communication:</b> data classes 0–3, <b>report by exception</b> and unsolicited responses, which conserves bandwidth.</li>
+<li><b>Security:</b> optional authentication and encryption (Secure Authentication) to protect against unauthorised access and tampering.</li>
+<li><b>Layered structure:</b> physical, data link, pseudo-transport and application layers; supports fragmentation.</li>
+</ul>
+<h4>IEC 60870-5-101 – significance and features</h4>
+<p>IEC 60870-5-101 is the IEC standard for telecontrol (SCADA) in electrical engineering and power-system automation, used for communication between a control centre and substations/RTUs, mainly over serial links. Its significance is that it provides <b>interoperability</b> between devices of different manufacturers in power systems. <b>Features:</b> three-layer EPA model (physical, link using FT1.2 frame with parity and checksum, and application layer); <b>balanced and unbalanced</b> transmission modes (polled or spontaneous); ASDUs with type identification, cause of transmission and information-object addresses; <b>time-tagged events</b>; general interrogation, clock synchronisation, command and counter interrogation services; suitable for low-bandwidth radio and PLC links; its TCP/IP counterpart is IEC 60870-5-104.</p></div>
+
+<div class="qa" id="b5-6"><div class="qhead"><h3>Q. Explain the different control modes in DCS operation.</h3><span class="marks">6 marks</span></div>
+<div class="tags"><span class="tag">Apr 2025 · Q19(b)</span></div>
+<p>In a DCS each control loop (function block / faceplate) can be switched among several operating modes, depending on process conditions and operator needs. The main modes are:</p>
+<ol>
+<li><b>Manual mode (MAN):</b> the operator sets the controller output (valve opening) directly from the faceplate; the PID algorithm does not act and the loop is effectively open. Used at start-up, shutdown, during instrument failure or commissioning. Typically the output tracks the manual value and the set point tracks the process value to give a bumpless return.</li>
+<li><b>Automatic mode (AUTO):</b> the controller compares the measured value with a <i>local set point</i> entered by the operator, and automatically calculates the output using the PID algorithm; the process variable is held at the set point.</li>
+<li><b>Cascade mode (CAS):</b> the output of an outer (master/primary) controller serves as the set point of an inner (slave/secondary) controller. E.g. in a heat exchanger, the temperature controller sets the set point of the steam flow controller. This reduces the effect of disturbances in the inner loop and improves performance.</li>
+<li><b>Remote set point / Supervisory mode (RSP / SUP):</b> the set point comes from another device – a supervisory computer, an optimisation program, or another loop – rather than from the operator. In a computer-supervisory (set-point) control the DCS controller still performs the regulation.</li>
+<li><b>Direct digital control (DDC):</b> the computer calculates the output and drives the final control element directly, without a separate analogue controller.</li>
+<li><b>Ratio mode:</b> the set point is kept proportional to another (wild) variable, such as air-to-fuel ratio in a burner.</li>
+</ol>
+<p>Additional strategies like feed-forward, split-range, override/selector and batch sequence are also implemented. Mode changes are made <b>bumpless</b> by initialisation algorithms so that the output does not jump during transfer, and the mode can be changed from the operator station according to security level. The ability to select the right control mode gives flexibility, safety and optimised operation.</p></div>
+
+<div class="qa" id="b5-7"><div class="qhead"><h3>Q. Compare SCADA and DCS for automation.</h3><span class="marks">4 – 7 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q19(b) (7)</span><span class="tag">Apr 2026 · Q20(b) (4)</span></div>
+<p>SCADA and DCS both provide monitoring and control of industrial processes through HMIs, but they differ in philosophy: SCADA is <b>data-acquisition and supervision oriented</b> for geographically spread assets, whereas the DCS is <b>process-control oriented</b> for a single, large, continuous plant.</p>
+<table>
+<tr><th>Point</th><th>SCADA</th><th>DCS</th></tr>
+<tr><td>Primary focus</td><td>Supervisory control and data acquisition – event-driven, data-oriented</td><td>Continuous process control – process-driven, with integrated regulatory control</td></tr>
+<tr><td>Geographical spread</td><td>Wide area: pipelines, grids, water networks, many sites (km–1000s km)</td><td>Single plant or site</td></tr>
+<tr><td>Control</td><td>Mostly supervisory; local control by RTU/PLC</td><td>Closed-loop control in distributed controllers (hundreds of PID loops)</td></tr>
+<tr><td>Architecture</td><td>Central master/server with remote RTUs/PLCs</td><td>Distributed controllers with redundant data highway</td></tr>
+<tr><td>Communication</td><td>WAN – radio, GSM, satellite, leased line; slow, may be lost; protocols DNP3, IEC 101/104, Modbus</td><td>High-speed, reliable, deterministic LAN/data highway; vendor protocols, fieldbus</td></tr>
+<tr><td>Response speed</td><td>Seconds (polling cycle) – slower</td><td>Milliseconds to 1 s – fast</td></tr>
+<tr><td>Reliability / redundancy</td><td>Link-dependent; redundancy at master</td><td>Very high; redundant controllers, I/O, networks</td></tr>
+<tr><td>Data handling</td><td>Strong in data logging, alarming, reporting, remote access</td><td>Strong in integrated control, batch, advanced control</td></tr>
+<tr><td>Vendors / openness</td><td>Hardware-independent, open protocols, mixed vendors</td><td>Usually proprietary single-vendor</td></tr>
+<tr><td>Cost</td><td>Lower for wide areas</td><td>Higher; suited to big plants</td></tr>
+<tr><td>Typical applications</td><td>Power transmission/distribution, oil &amp; gas pipelines, water supply, railways</td><td>Refineries, chemical, power plants, cement, paper</td></tr></table>
+<p>In modern plants the two are converging: DCS packages offer SCADA-like remote functions, and SCADA software is combined with PLCs to give DCS-like control.</p></div>
+
+<div class="qa" id="b5-8"><div class="qhead"><h3>Q. Explain the role of HMI and MTU in SCADA communication.</h3><span class="marks">4 – 6 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q20(b) (6)</span><span class="tag syl">Model Q20(a) (MTU, 4)</span></div>
+<p><b>Role of the MTU (Master Terminal Unit).</b> The MTU, located in the control centre, is the master of the SCADA communication system: it initiates communication with the RTUs. It (i) <b>polls</b> the RTUs and PLCs periodically (or receives unsolicited reports), requesting the current status and measured values; (ii) <b>decodes and validates</b> the received messages according to the protocol (DNP3, IEC 101, Modbus) and updates the real-time database; (iii) <b>sends control commands</b> and set points from the operator to the selected RTUs after a select-before-operate check; (iv) manages the communication channels – timeouts, retries, channel switching to redundant routes, and diagnostics; (v) provides data to the HMI and archives it into the historian; (vi) synchronises the time of RTUs and exchanges data with other control centres or the enterprise network. Because its failure disables supervision of the whole system, MTUs are normally duplicated (hot-standby).</p>
+<p><b>Role of the HMI.</b> The HMI is the operator's window to the process. It takes the data in the MTU's database and displays it on mimic diagrams with animated symbols, trend graphs, alarm and event lists, and reports; it also accepts the operator's inputs (start/stop, open/close, set-point, mode) and passes them to the MTU, which transmits them to the RTU. It gives the operator real-time status, speeds up fault recognition and corrective action, enables alarm acknowledgement, and implements security levels so that only authorised personnel may control. Together, the MTU does the communication and data management while the HMI does the presentation and the operator interaction, and these form the supervisory loop of the SCADA system.</p></div>
+
+</main></div>
+</body>
+</html>

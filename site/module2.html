@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 2 – Signal Conditioning & Final Control | EET468</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="script.js"></script>
+</head>
+<body>
+<div class="layout"><main>
+
+<h1 class="title">Module 2 · Signal Conditioning Circuits and Final Control</h1>
+<p class="lead">Differential, instrumentation, log, carrier, lock-in, isolation and charge amplifiers · precision rectifiers · phase-sensitive detector · actuators (electrical, pneumatic, hydraulic) · control elements and valves.</p>
+
+<input id="search" class="search" placeholder="Search questions in this module (e.g. rectifier, actuator, log)…">
+
+<div class="toc"><b>Contents</b>
+<ul>
+<li><a href="#theory">Part 1 – Syllabus theory</a></li>
+<li><a href="#partA">Part 2 – Part A short answers</a></li>
+<li><a href="#partB">Part 3 – Part B long answers</a></li>
+</ul></div>
+
+<h2 id="theory">Part 1 · Syllabus Theory</h2>
+
+<div class="topic" id="t-sc">
+<h3>2.1 Why signal conditioning?</h3>
+<p>The raw output of a transducer is usually small (microvolts to millivolts), noisy, non-linear, of high output impedance, and often carries a large common-mode voltage. <b>Signal conditioning</b> is the set of operations – amplification, filtering, linearisation, isolation, modulation/demodulation, rectification, conversion (V–I, V–f, A/D) – which prepares the signal for transmission, display or control. Electronic amplifiers built around operational amplifiers (op-amps) form the core of these circuits. An ideal op-amp has infinite gain, infinite input resistance, zero output resistance and infinite CMRR; in an op-amp circuit with negative feedback the two input terminals are at the same potential (<i>virtual short</i>) and draw no current.</p>
+</div>
+
+<div class="topic" id="t-diff">
+<h3>2.2 Differential amplifier</h3>
+<p>A differential amplifier amplifies the <i>difference</i> between two input signals and rejects the signal common to both. This is very valuable in instrumentation because noise picked up equally on both leads (power-line hum, ground potential differences) appears as a <b>common-mode</b> signal and is cancelled, while the genuine transducer signal appears as a <b>differential</b> signal. Using one op-amp and four resistors:</p>
+<pre class="fig">
+         R1                 R2
+ V1 o---/\/\/---+---------/\/\/---+
+                |   -\            |
+                +----|  \         |
+                     |   &gt;--------+------o Vo
+                +----|  /
+         R1     |   +/
+ V2 o---/\/\/---+---/\/\/---+   (R2 from non-inverting input to ground)
+                           |
+                          GND
+</pre>
+<p>Applying superposition with matched resistors (the ratio $R_2/R_1$ equal in both halves), the output is</p>
+$$ V_o = -\frac{R_2}{R_1}V_1 + \left(1+\frac{R_2}{R_1}\right)\frac{R_2}{R_1+R_2}V_2 = \frac{R_2}{R_1}\,(V_2 - V_1) $$
+<p>so the differential gain is $A_d = R_2/R_1$. The ability to reject common-mode signals is expressed by the <b>common-mode rejection ratio</b></p>
+$$ \text{CMRR} = \frac{A_d}{A_c}\quad\text{or}\quad 20\log_{10}\frac{A_d}{A_c}\ \text{dB}. $$
+<p>Mismatch in the resistors reduces CMRR drastically – a 0.1 % mismatch limits CMRR to about 66 dB. The simple circuit has two drawbacks: the input resistance is only $R_1$ (and different for the two inputs), and changing gain requires changing two resistors simultaneously. These problems are overcome by the instrumentation amplifier.</p>
+</div>
+
+<div class="topic" id="t-ia">
+<h3>2.3 Instrumentation amplifier</h3>
+<p>The instrumentation amplifier (IA) is a precision differential amplifier with <b>very high input impedance</b> (both inputs), <b>high and stable CMRR</b>, low offset and drift, low output impedance and a gain that can be set with a single resistor $R_G$. The classic design uses three op-amps: A1 and A2 are non-inverting input buffers/pre-amplifiers connected together through the gain resistor $R_G$, and A3 is a difference amplifier. (<b>Difference from a simple differential amplifier:</b> the IA has an input stage giving high impedance at each input, its gain is set by a single resistor and its CMRR is very high, whereas the differential amplifier has low and unequal input impedances, needs two matched resistors to change gain, and has a lower CMRR.)</p>
+<pre class="fig">
+ V1 o--------+\ A1                       R2        R3
+             |  &gt;--+--- R1 ---+-----/\/\/----+
+          +--+/    |          |             |   |\ A3
+          |        Rg(gain)    +--- Vo1      +---|-\
+          |        |                            |  &gt;---o Vo
+          |        |      Vo2 ------/\/\/--+----|+/
+          +--+\    |          |        R2  |    /\/\/ R3 -- GND
+             |  &gt;--+--- R1 ---+
+ V2 o--------+/ A2
+</pre>
+<h4>Derivation of the gain</h4>
+<p>Because of the virtual short at the inputs of A1 and A2, the voltage at the two ends of $R_G$ is $V_1$ and $V_2$. The current through $R_G$ is therefore</p>
+$$ I_G = \frac{V_1 - V_2}{R_G}. $$
+<p>No current flows into the op-amp inputs, so the same current flows through both $R_1$ resistors. The outputs of A1 and A2 are</p>
+$$ V_{o1} = V_1 + I_G R_1,\qquad V_{o2} = V_2 - I_G R_1 . $$
+$$ \begin{aligned} V_{o1}-V_{o2} &= (V_1 - V_2) + 2 I_G R_1 \\ &= (V_1-V_2)\left(1+\frac{2R_1}{R_G}\right). \end{aligned} $$
+<p>The difference amplifier A3 with resistors $R_2,R_2$ at the inputs and $R_3,R_3$ as the feedback/ground resistors amplifies $(V_{o2}-V_{o1})$ by $R_3/R_2$, so</p>
+$$ V_o = \frac{R_3}{R_2}\,(V_{o2}-V_{o1}) = \boxed{\,\frac{R_3}{R_2}\left(1+\frac{2R_1}{R_G}\right)(V_2-V_1)\,} $$
+<p>The first stage amplifies only the differential signal (gain $1+2R_1/R_G$) while the common-mode signal passes with unity gain, because no current flows in $R_G$ for equal inputs; hence the overall CMRR is improved by the first-stage differential gain. Gain is varied by varying $R_G$ alone. Integrated IAs such as AD620/INA128 provide up to 120 dB CMRR. <b>Applications:</b> strain-gauge bridge amplifiers, thermocouple amplifiers, ECG/biomedical, data-acquisition front ends.</p>
+</div>
+
+<div class="topic" id="t-pr">
+<h3>2.4 Precision rectifiers</h3>
+<p>An ordinary diode rectifier cannot rectify signals smaller than the diode's forward voltage drop $V_\gamma\approx0.6$ V, and is non-linear for small signals. A <b>precision rectifier</b> (<i>super diode</i>) places the diode inside the feedback loop of an op-amp. The forward drop is then divided by the open-loop gain $A_{ol}$, so the effective threshold becomes $V_\gamma/A_{ol}$ (a few microvolts). Precision rectifiers are used to convert small AC signals from transducers to DC, in AC voltmeters, peak detectors, and in demodulators for LVDT and carrier systems.</p>
+<h4>Half-wave precision rectifier</h4>
+<pre class="fig">
+                         diode D
+ Vin o---+\                |\|
+         |  &gt;--------------| &gt;|---+------o Vo
+      +--|+/                |/|   |
+      |    ^----------------------+ (feedback taken from load)     RL
+      '--- (inverting input connected to Vo)---------------------/\/\/-- GND
+</pre>
+<p>In the non-inverting version the signal $V_{in}$ is applied to the non-inverting input; the output of the op-amp drives the diode, and the load $R_L$ is connected after the diode with its voltage fed back to the inverting input. <b>Positive half-cycle:</b> the op-amp output goes positive, forward-biasing the diode; the loop is closed, the virtual short makes $V_o = V_{in}$. <b>Negative half-cycle:</b> the op-amp output swings negative, the diode is reverse-biased, no current flows through $R_L$ and $V_o = 0$. Hence</p>
+$$ V_o = \begin{cases} V_{in}, & V_{in} > 0\\ 0, & V_{in}\le 0 \end{cases} $$
+<p>(For an inverting version with gain $-R_f/R_1$, $V_o = -\dfrac{R_f}{R_1}V_{in}$ for the conducting polarity and zero otherwise.) The op-amp output must swing about $0.6$ V quickly when the polarity changes, so the slew rate limits the useful frequency range.</p>
+<h4>Full-wave precision rectifier (absolute-value circuit)</h4>
+<pre class="fig">
+                 R               D1      D2
+ Vin o---+---/\/\/---+---|&lt;|---+----|&gt;|---+-- V1       R      R/2 (=R/2)
+         |           |        |          |           +---/\/\/---+--- from V1
+         |         inv  [A1]  |          |      Vin -+---/\/\/---+          Rf = R
+         |                    +----------+                        |  (-)
+         |                                           [A2 summing amp] ---o Vo = |Vin|
+         '---- to summing junction (R) ------------------------^
+</pre>
+<p>The circuit has two stages: an <b>inverting half-wave rectifier</b> (A1, D1, D2) followed by an <b>inverting summing amplifier</b> (A2) which adds the original signal to twice the half-wave signal. Let the first stage give $V_1 = -V_{in}$ for $V_{in}>0$ and $V_1 = 0$ for $V_{in}<0$. With resistors $R$ for $V_{in}$, $R/2$ for $V_1$ and feedback resistor $R$, the summing amplifier gives</p>
+$$ V_o = -\left(\frac{R}{R}V_{in} + \frac{R}{R/2}V_1\right) = -(V_{in}+2V_1). $$
+<ul>
+<li><b>$V_{in}>0$:</b> $V_1=-V_{in}$, so $V_o = -(V_{in}-2V_{in}) = +V_{in}$.</li>
+<li><b>$V_{in}<0$:</b> $V_1=0$, so $V_o = -V_{in} = |V_{in}|$.</li>
+</ul>
+<p>Therefore $V_o = |V_{in}|$ for both half-cycles: an accurate full-wave rectified output, down to millivolt level and independent of diode drops. Adding a low-pass filter at the output gives the average value $V_{avg} = 2V_m/\pi$ for a sine of peak $V_m$, which is proportional to the average (rectified) value of the signal and is used for AC-to-DC conversion in meters.</p>
+</div>
+
+<div class="topic" id="t-log">
+<h3>2.5 Logarithmic amplifier</h3>
+<p>A log amplifier produces an output proportional to the logarithm of the input. It compresses a wide dynamic range of input (e.g. 1 mV–10 V, i.e. 80 dB) into a manageable output range and is useful for signals like sound intensity, pH-like or optical-density measurements, and for multiplication/division by adding/subtracting logarithms. It uses the exponential relation between the collector current and base–emitter voltage of a transistor (or diode) in the feedback path of an op-amp:</p>
+$$ I_C = I_S\left(e^{V_{BE}/V_T}-1\right)\approx I_S\,e^{V_{BE}/V_T},\qquad V_T=\frac{kT}{q}\approx 26\ \text{mV at }300\,\text{K}. $$
+<pre class="fig">
+               +------- Q (collector to inverting node, base grounded) ---+
+               |         ____                                           |
+ Vin o---/\/\/---+--------|-   \                                         |
+          R      |   (virtual ground)\___                                |
+                 '-----------------|+  /----+---------------------------+--o Vo
+                                   GND  /-'
+</pre>
+<h4>Derivation</h4>
+<p>The inverting input is a virtual ground. The input current is $I_{in}=V_{in}/R$, which must all flow through the transistor $Q$ (the op-amp draws none): $I_C = V_{in}/R$. The base of $Q$ is grounded and its collector is at the virtual ground, so the emitter (at the output) is at $V_o = -V_{BE}$. Therefore</p>
+$$ \begin{aligned}
+\frac{V_{in}}{R} &= I_S\,e^{V_{BE}/V_T}\\
+\Rightarrow\ V_{BE} &= V_T\ln\!\left(\frac{V_{in}}{R\,I_S}\right)\\
+\Rightarrow\ V_o &= -V_T\,\ln\!\left(\frac{V_{in}}{R\,I_S}\right) = -V_T\ln V_{in} + V_T\ln(RI_S).
+\end{aligned} $$
+<p>Hence the output is proportional to the <b>logarithm of the input</b> (the constants $V_T$, $R$, $I_S$ only scale and shift it): $V_o = -K\ln V_{in} + \text{const}$, with $K = V_T$. In decimal logs, $V_o=-2.3\,V_T\log_{10}(V_{in}/RI_S)$, i.e. about $-60$ mV per decade at room temperature. The input must be positive for the circuit to work. <b>Limitations:</b> $V_T$ and $I_S$ are strongly temperature-dependent (compensated by a matched transistor pair and a thermistor), and accuracy is poor at very small and very large currents. <b>Applications:</b> (i) compression of signals with a wide dynamic range, (ii) analog multiplication/division/exponentiation with antilog amplifiers, (iii) decibel conversion in audio and spectrum analysers, (iv) absorbance measurement in spectrophotometers (Beer's law), (v) true-RMS and power computation, and (vi) nuclear/photodiode current measurement.</p>
+</div>
+
+<div class="topic" id="t-carrier">
+<h3>2.6 Carrier amplifier</h3>
+<p>Low-level DC and slowly varying signals (strain gauges, thermocouples, LVDT, pressure bridges) are difficult to amplify directly because of amplifier drift and low-frequency (1/f) noise. A <b>carrier amplifier</b> places the signal on an AC carrier: a carrier oscillator excites the bridge so that the transducer output is an <b>amplitude-modulated</b> carrier ($v = A\,(1+m\,s(t))\cos\omega_c t$). This signal is amplified by a drift-free AC amplifier (which can use coupling capacitors), then <b>demodulated</b> by a phase-sensitive demodulator and low-pass filtered to recover the original signal. Advantages: excellent drift and noise rejection, immunity to thermal EMFs and long cable pick-up, and the phase information tells the polarity of the signal.</p>
+</div>
+
+<div class="topic" id="t-lockin">
+<h3>2.7 Lock-in amplifier</h3>
+<p>A lock-in amplifier extracts a very small AC signal of known frequency from a very large noise background (noise can be a thousand times larger than the signal). The input is mixed with a reference signal at the same frequency by a <b>phase-sensitive detector</b>; a <b>low-pass filter</b> with a very narrow bandwidth (long time constant) then passes only the DC component generated by signal components that are correlated in frequency and phase with the reference:</p>
+$$ V_{dc} = \frac{2}{\pi}\,V_s\cos\phi \ \ (\text{for square-wave reference}). $$
+<p>The equivalent noise bandwidth is $\approx 1/(4RC)$ Hz, which can be fractions of a hertz, so noise is eliminated as if a band-pass filter with an extremely high Q was available. Phase-shifters allow the reference to be adjusted for $\phi=0$ (maximum output), and two PSDs 90° apart provide in-phase and quadrature components. Applications: optical chopper measurements, weak-signal detection, impedance bridges, LVDT demodulation.</p>
+</div>
+
+<div class="topic" id="t-iso">
+<h3>2.8 Isolation amplifier</h3>
+<p>An isolation amplifier has input and output sections which are <b>galvanically separated</b> (no direct electrical path) while still transferring the signal. The signal passes through a transformer (using carrier modulation), an optical coupler (LED–photodiode) or a capacitor (high-frequency modulation across a barrier), and the amplifier's power is also isolated through an isolated DC–DC converter. It is used where (i) there are large common-mode voltages or high voltage at the sensor side, (ii) <b>ground loops</b> must be broken, (iii) patient safety must be guaranteed (biomedical equipment), and (iv) leakage and fault currents must be prevented from entering the controller or the operator's side. Typical isolation ratings are 1.5 kV to several kV, with CMRR >100 dB and very small leakage current. Examples: AD210 (transformer), ISO124 (capacitive), HCPL-7800 (optical).</p>
+<pre class="fig">
+ Input section  |  BARRIER   | Output section
+ sensor-&gt;[Amp]-&gt;[Modulator]--//--[Demodulator]-&gt;[Filter]-&gt; Vo
+ isolated supply &lt;-- power coupling (isolated DC-DC converter) --&gt; output supply
+</pre>
+</div>
+
+<div class="topic" id="t-charge">
+<h3>2.9 Charge amplifier</h3>
+<p>Piezoelectric transducers generate a <b>charge</b> $Q$ proportional to applied force ($Q = d\,F$ where $d$ is the piezoelectric constant, in pC/N). Their source impedance is extremely high and capacitive, so the voltage across the sensor depends on the cable capacitance. A <b>charge amplifier</b> is an op-amp integrator with a feedback capacitor $C_f$ in parallel with a large resistor $R_f$, which converts charge to voltage <i>independent of the cable capacitance</i>.</p>
+<pre class="fig">
+                  +------||------+----/\/\/----+   Cf  ||  Rf (DC path)
+ Piezo (Cs)       |                            |
+ + cable (Cc) ----+--------(-)\                |
+                             |  &gt;---------------+---o Vo = -Q / Cf
+                    GND -----(+)/
+</pre>
+<p>The inverting input is at a virtual ground, so the sensor and cable capacitance have no voltage across them and all the charge generated is transferred to $C_f$. Hence</p>
+$$ V_o = -\frac{Q}{C_f}\quad\Longrightarrow\quad \text{sensitivity } \frac{V_o}{F}= -\frac{d}{C_f}. $$
+<p>(More exactly, the finite gain $A$ of the op-amp gives $V_o = -\dfrac{Q}{C_f+(C_s+C_c+C_f)/A}$, so cable capacitance matters only if $A$ is low.) $R_f$ provides a DC path so that bias current does not charge $C_f$ to saturation; it sets a low-frequency cut-off $f_L = \dfrac{1}{2\pi R_f C_f}$, so a charge amplifier cannot measure truly static forces. The gain can be changed by selecting $C_f$. Use: accelerometers, dynamic pressure and force measurement.</p>
+</div>
+
+<div class="topic" id="t-psd">
+<h3>2.10 Phase-sensitive detector (PSD)</h3>
+<p>A phase-sensitive detector (synchronous detector/demodulator) measures the <b>amplitude and phase</b> of an AC signal relative to a reference signal of the same frequency. Its output is a DC voltage whose magnitude and polarity depend on the amplitude and phase of the input.</p>
+<pre class="fig">
+                      Reference square wave  (drives switch S)
+                                |
+   Vs --[Amp]--+---------------[ S ]---- contact 1 ------------+
+               |               (+1 / -1 switch)                 +--&gt;[Low-pass filter]--&gt; Vdc
+               '--[Inverter -1]--------- contact 2 ------------+
+</pre>
+<p>The reference is converted into a square wave which operates a switch: for the positive half-cycle of the reference, the switch passes the signal directly (contact 1); during the negative half-cycle it passes the inverted signal (contact 2). It is equivalent to multiplying the signal by a unit square wave of the same frequency. If the signal is $v_s = V_m\sin(\omega t+\phi)$, the average (low-pass) output over a cycle is</p>
+$$ V_{dc} = \frac{1}{\pi}\int_{0}^{\pi}V_m\sin(\omega t+\phi)\,d(\omega t)\ \cdot\ \text{(full-wave)} = \frac{2V_m}{\pi}\cos\phi . $$
+<p>Hence $V_{dc}$ is maximum when the signal is in phase with the reference ($\phi=0$), zero when the quadrature ($\phi=90^\circ$), and negative for $\phi>90^\circ$. This allows (i) <b>phase measurement</b> (by using a known amplitude, $\phi = \cos^{-1}(\pi V_{dc}/2V_m)$, or using two PSDs 90° apart to obtain $V\cos\phi$ and $V\sin\phi$ and $\tan\phi$), (ii) <b>demodulation</b> of AM and carrier signals with polarity information (LVDT), (iii) <b>noise rejection</b>, since noise at other frequencies averages to zero, as in lock-in amplifiers. Implementations use analog switches (CMOS), diode ring modulators or analog multipliers.</p>
+</div>
+
+<div class="topic" id="t-fco">
+<h3>2.11 Final control operation – signal conversion, actuators, control elements</h3>
+<p>The <b>final control element</b> is the part of the loop that physically changes the manipulated variable. A <b>final control operation</b> normally has three steps: (1) <b>signal conversion</b> – the low-power controller output (4–20 mA, 1–5 V, digital) is converted into a form suitable to drive the actuator, e.g. I/P (current-to-pressure) converter giving 3–15 psi, digital-to-analog conversion, or PWM/thyristor firing; (2) the <b>actuator</b> – a device which translates the control signal into mechanical action (force, torque, motion); (3) the <b>control element</b> – the device that directly alters the process flow of energy or material, such as a valve, damper, heater, or variable speed drive.</p>
+<h4>Actuators</h4>
+<p><b>Electrical actuators</b> use electric power. <i>Solenoids</i> are an electromagnet with a movable plunger; a current in the coil pulls the plunger in with a force $F=\tfrac12 I^2\,\dfrac{dL}{dx}$ and are used for on/off operation of small valves, relays and latches. <i>Relays/contactors</i> switch power circuits. <i>DC motors</i> give controllable speed with equations $E_b=K_e\omega$, $V = E_b + I_aR_a$, $T=K_tI_a$ – used in conveyors, robots and positioners. <i>AC motors</i> (induction, synchronous with variable-frequency drives) drive pumps, fans and compressors. <i>Servo motors</i> with feedback give precise position control, and <i>stepper motors</i> rotate through fixed angle $\theta_s = 360^\circ/(m N_r)$ per pulse and are used in open-loop positioning (printers, valve positioners, CNC).</p>
+<p><b>Pneumatic actuators</b> use compressed air (typically 3–15 psi control signal, 20–100 kPa; supply 4–7 bar). The most common is the <i>spring-and-diaphragm actuator</i> that moves a valve stem: force $F = P\,A_d$ balanced by spring force $kx$, so stem travel $x=PA_d/k$ is proportional to signal pressure. Air cylinders (single or double acting) give linear force for clamps and dampers. They are simple, inexpensive, intrinsically safe/explosion-proof, fast and clean, but air is compressible so positioning is less stiff.</p>
+<p><b>Hydraulic actuators</b> use incompressible oil at high pressure (up to 200–300 bar) from a pump. A hydraulic system comprises a reservoir, pump (with motor), pressure relief valve, directional control valve (servo or solenoid), filters and a cylinder or hydraulic motor. The force and speed are $F = P\,A$ and $v=Q/A$. They deliver very large force in a compact size with stiff, accurate, fast response, and so are used for heavy-duty applications such as rolling mills, presses, and large valves, but they are costly, need maintenance and risk leakage.</p>
+<h4>Control elements</h4>
+<p><b>Mechanical</b> (valves, dampers, louvres, gears, cams, linkages, pumps with variable stroke); <b>electrical</b> (relays, contactors, solid-state relays, thyristors/SCR, TRIACs for heater and lamp control, VFDs and servo drives) and <b>fluid</b> (control valves, dampers, variable-speed pumps). Electrical control elements regulate energy by phase-angle or on/off burst control of the supply.</p>
+<h4>Fluid (control) valves</h4>
+<p>A control valve is a variable restriction in a pipe; flow through it is given by $Q = C_v\sqrt{\Delta P/G}$ where $C_v$ is the valve flow coefficient, $\Delta P$ the pressure drop and $G$ the specific gravity. The relation between stem travel and flow at a constant pressure drop is the <b>inherent characteristic</b>: <i>quick-opening</i> (on/off service), <i>linear</i> and <i>equal-percentage</i> (each equal increment of travel gives an equal % change of flow – most used in process control). Valve body types include <b>globe</b> (single/double seated: good throttling), <b>gate</b> (on/off), <b>ball</b> and <b>butterfly</b> (large pipes, low drop), <b>diaphragm</b> (corrosive/slurry), plug and needle valves. The action may be air-to-open or air-to-close, selected for fail-safe operation.</p>
+</div>
+
+<h2 id="partA">Part 2 · Part A – Short Answers (3 marks)</h2>
+
+<div class="qa a" id="a2-1"><div class="qhead"><h3>Explain the log amplifier with relevant expressions. / List the applications of log amplifiers.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q3</span><span class="tag">Apr 2025 · Q3</span></div>
+<p>A logarithmic amplifier is an op-amp circuit whose output is proportional to the logarithm of the input. A transistor (or diode) is placed in the feedback path of an inverting op-amp, with input resistor $R$. Because the collector current is exponential in $V_{BE}$, $I_C=I_S e^{V_{BE}/V_T}$, and because $I_C = V_{in}/R$ with $V_o=-V_{BE}$:</p>
+$$ V_o = -V_T\ln\!\left(\frac{V_{in}}{R\,I_S}\right). $$
+<p>Thus the output varies as $\ln V_{in}$ and requires $V_{in}>0$. <b>Applications:</b> compression of signals of wide dynamic range (e.g. 1 mV to 10 V), decibel meters and spectrum analysers, multiplication/division/powers using log and antilog amplifiers, spectrophotometer absorbance measurement, and linearisation of non-linear sensors.</p></div>
+
+<div class="qa a" id="a2-2"><div class="qhead"><h3>Name any six signal conditioning circuits with their applications.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q4</span><span class="tag">Apr 2026 · Q3</span></div>
+<table><tr><th>Circuit</th><th>Application</th></tr>
+<tr><td>Differential amplifier</td><td>Rejecting common-mode noise from sensors / bridge outputs</td></tr>
+<tr><td>Instrumentation amplifier</td><td>Strain gauge, thermocouple, ECG amplifiers; high CMRR, high input impedance</td></tr>
+<tr><td>Precision rectifier</td><td>AC to DC conversion of small signals, AC meters, peak detectors</td></tr>
+<tr><td>Log amplifier</td><td>Compression of dynamic range, dB measurement, multiplication</td></tr>
+<tr><td>Carrier amplifier</td><td>Drift-free amplification of DC signals from bridges, LVDT</td></tr>
+<tr><td>Lock-in amplifier</td><td>Measurement of very weak signals buried in noise</td></tr>
+<tr><td>Isolation amplifier</td><td>Breaking ground loops, patient safety, high voltage protection</td></tr>
+<tr><td>Charge amplifier</td><td>Piezoelectric accelerometers and force sensors</td></tr>
+<tr><td>Phase-sensitive detector</td><td>Demodulation of AM/LVDT signals, phase measurement</td></tr></table>
+<p>(Any six of the above are acceptable, with a short description each.)</p></div>
+
+<div class="qa a" id="a2-3"><div class="qhead"><h3>Explain the operation of a charge amplifier.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q3</span></div>
+<p>A charge amplifier is an inverting op-amp integrator, with feedback capacitor $C_f$ shunted by a large resistor $R_f$, which is used with charge-generating sensors, mostly piezoelectric. The charge $Q$ produced by the sensor is forced to flow onto $C_f$, because the inverting input is at virtual ground and the op-amp draws no current. Thus the output voltage is</p>
+$$ V_o = -\frac{Q}{C_f}. $$
+<p>It is independent of the sensor and cable capacitance, which is a big advantage. The resistor $R_f$ gives a DC path to prevent drift to saturation and fixes the lower cut-off frequency $f_L = 1/(2\pi R_f C_f)$.</p></div>
+
+<div class="qa a" id="a2-4"><div class="qhead"><h3>Explain the principle and operation of a phase-sensitive detector.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q4</span></div>
+<p>A phase-sensitive detector is used to measure the amplitude and phase of a periodic signal with respect to a reference signal of the same frequency. The reference is a square wave that drives a switch towards contact 1 during its positive half-cycle and to contact 2 (the inverted signal) during the negative half-cycle. The sinusoidal test signal is amplified to a reasonable amplitude and then applied to the switching arrangement. The switch output is a full-wave rectified signal whose average value after low-pass filtering is</p>
+$$ V_{dc}=\frac{2V_m}{\pi}\cos\phi, $$
+<p>which is proportional to the signal amplitude $V_m$ and to the cosine of the phase angle $\phi$ between signal and reference. It is maximum for in-phase signals and zero for quadrature signals, and noise of different frequency is averaged out.</p></div>
+
+<div class="qa a" id="a2-5"><div class="qhead"><h3>What is an isolation amplifier?</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Apr 2026 · Q4</span></div>
+<p>An isolation amplifier is a signal-conditioning amplifier in which the input and output (and their power supplies) are electrically isolated from each other by a barrier, so no direct ohmic path exists between them. The signal is coupled across the barrier by a transformer (magnetic), opto-coupler (optical) or capacitor (electrostatic) after modulation, and demodulated at the output. It provides protection of the instruments and operators from high common-mode voltage, breaks ground loops, and ensures patient safety in biomedical measurement. Typical features: isolation voltage of kilovolts, CMRR above 100 dB, low leakage current.</p></div>
+
+<div class="qa a" id="a2-6"><div class="qhead"><h3>Write any three electrical control elements and their applications.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Apr 2025 · Q4</span></div>
+<ul>
+<li><b>Relay / contactor:</b> an electromagnetic switch that makes or breaks power circuits for on/off control of motors, heaters and lamps from low-power controller signals (PLC outputs).</li>
+<li><b>Solid-state relay / SCR (thyristor) / TRIAC:</b> semiconductor switches used for phase-angle or burst-fire control of heater power, lamp dimmers and AC motor speed, with no moving parts and long life.</li>
+<li><b>Solenoid:</b> electromagnet-operated plunger used for on/off control of small valves, latches and door locks.</li>
+</ul>
+<p>(Others: variable frequency drives for pump and fan speed control, DC drives, stepper and servo motors.)</p></div>
+
+<h2 id="partB">Part 3 · Part B – Long Answers</h2>
+
+<div class="qa" id="b2-1"><div class="qhead"><h3>Q. Derive an expression for the output voltage of a logarithmic amplifier and show that it is proportional to the logarithm of input voltage.</h3><span class="marks">8 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q13(a)</span><span class="tag">Apr 2026 · Q13(a)</span></div>
+<p>A logarithmic amplifier is an inverting amplifier whose feedback element is a semiconductor junction (a diode or the base–emitter junction of a transistor connected as a diode), the junction's exponential characteristic being used to obtain a log relationship.</p>
+<pre class="fig">
+                              C
+                  +----------( )--+      Q = NPN transistor (base grounded, collector
+                  |    Q  B--GND  |      connected to the inverting node, emitter to output)
+ Vin o---/\/\/----+---------------+
+          R       |      |\
+                  '------|-\
+                         |  &gt;---------o Vo
+                  GND----|+/
+</pre>
+<p><b>Assumptions.</b> The op-amp is ideal (infinite gain, no input current, so the inverting terminal is at virtual ground, $0$ V). The transistor is in the active region, so for the transistor the collector current is given by the Ebers–Moll relation</p>
+$$ I_C = I_S\left(e^{V_{BE}/V_T}-1\right) \approx I_S\,e^{V_{BE}/V_T}\quad (V_{BE}\gg V_T) $$
+<p>where $I_S$ is the reverse saturation current and $V_T = kT/q$ is the thermal voltage ($\approx 26$ mV at 300 K).</p>
+<p><b>Derivation.</b> Applying KCL at the inverting node – the input current $V_{in}/R$ flows into the collector of $Q$ because the op-amp input current is zero:</p>
+$$ I_{in}=\frac{V_{in}-0}{R}=I_C=I_S\,e^{V_{BE}/V_T}. $$
+<p>Taking natural logarithms of both sides and solving for $V_{BE}$:</p>
+$$ \ln\!\left(\frac{V_{in}}{R\,I_S}\right)=\frac{V_{BE}}{V_T}\quad\Rightarrow\quad V_{BE}=V_T\ln\!\left(\frac{V_{in}}{R\,I_S}\right). $$
+<p>The base is grounded and the collector is at virtual ground, so the emitter is at the output voltage $V_o$, and $V_{BE} = V_B - V_E = 0 - V_o = -V_o$. Therefore</p>
+$$ \boxed{V_o=-V_T\,\ln\!\left(\frac{V_{in}}{R\,I_S}\right)=-V_T\ln V_{in}+V_T\ln\!\left(R\,I_S\right)} $$
+<p>Since $V_T$, $R$ and $I_S$ are constants for a given circuit and temperature, the output is directly proportional to the logarithm of the input voltage: $V_o = -K\ln V_{in}+C$ with $K=V_T\approx 26$ mV (or $60$ mV per decade). This proves the required result. The negative sign is a consequence of the inverting configuration, and it works only for $V_{in}>0$. $I_S$ and $V_T$ vary with temperature, so practical circuits use a matched second transistor and a temperature-compensating resistor to cancel them. The usable input range spans about 3–5 decades (nA to mA of collector current).</p></div>
+
+<div class="qa" id="b2-2"><div class="qhead"><h3>Q. Explain the operation of a differential amplifier / how an instrumentation amplifier differs; derive its gain.</h3><span class="marks">6 – 7 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q13(b)</span><span class="tag">May 2024 · Q13(a)</span><span class="tag syl">Model paper Q14(a)</span></div>
+<p><b>Differential amplifier.</b> It uses one op-amp and four resistors ($R_1$ at each input, $R_2$ in the feedback and from the non-inverting input to ground). Using superposition: with $V_2=0$, the circuit is an inverting amplifier, giving $V_{o}' = -\dfrac{R_2}{R_1}V_1$. With $V_1=0$ the non-inverting input voltage is $V_2\dfrac{R_2}{R_1+R_2}$ and the stage is non-inverting with gain $1+\dfrac{R_2}{R_1}$, so $V_o'' = \left(1+\dfrac{R_2}{R_1}\right)\dfrac{R_2}{R_1+R_2}V_2 = \dfrac{R_2}{R_1}V_2$. Adding both,</p>
+$$ V_o=\frac{R_2}{R_1}\,(V_2-V_1). $$
+<p>Only the difference of the inputs is amplified, so common-mode noise cancels. Its limitations are low and unequal input impedance, and the need to change two resistors for gain adjustment.</p>
+<p><b>Instrumentation amplifier (IA) vs differential amplifier.</b></p>
+<table><tr><th>Differential amplifier</th><th>Instrumentation amplifier</th></tr>
+<tr><td>One op-amp, four resistors</td><td>Three op-amps (two buffers/pre-amplifiers + one difference amplifier)</td></tr>
+<tr><td>Low input impedance, unequal on two inputs</td><td>Very high, equal input impedance on both inputs</td></tr>
+<tr><td>Gain adjusted by changing two matched resistors</td><td>Gain adjusted with a single resistor $R_G$</td></tr>
+<tr><td>CMRR limited by resistor matching</td><td>High CMRR (up to 120 dB) because first stage amplifies only the difference</td></tr></table>
+<p><b>Gain of the IA.</b> The virtual short makes the voltage across $R_G$ equal to $V_1-V_2$; therefore the current $I_G=(V_1-V_2)/R_G$ flows through the two feedback resistors $R_1$ as well. The outputs of A1 and A2 are $V_{o1}=V_1+I_GR_1$ and $V_{o2}=V_2-I_GR_1$, giving</p>
+$$ V_{o2}-V_{o1}=(V_2-V_1)\left(1+\frac{2R_1}{R_G}\right). $$
+<p>Stage three is a difference amplifier with gain $R_3/R_2$, so the overall output is</p>
+$$ V_o=\frac{R_3}{R_2}\left(1+\frac{2R_1}{R_G}\right)(V_2-V_1). $$
+<p>With $R_2=R_3$ the overall gain is $1+2R_1/R_G$. For example, $R_1 = 25\ \text{k}\Omega$ and $R_G=1\ \text{k}\Omega$ gives a gain of $51$. Common-mode inputs pass the first stage with unity gain (no current in $R_G$) and are then rejected by the difference stage. Uses: strain-gauge bridges, thermocouples, biomedical, data acquisition.</p></div>
+
+<div class="qa" id="b2-3"><div class="qhead"><h3>Q. Explain the operation of half-wave and full-wave precision rectifiers with circuit analysis.</h3><span class="marks">6 – 8 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q14(a)</span><span class="tag">Apr 2025 · Q13(a)</span><span class="tag">Apr 2026 · Q13(b) (full wave, 6)</span></div>
+<p>A conventional diode rectifier fails for small signals because a silicon diode does not conduct until its forward voltage $V_\gamma\approx 0.6$–$0.7$ V is exceeded and its characteristic is non-linear. The precision rectifier places the diode inside the feedback loop of an op-amp so the effective threshold is reduced to $V_\gamma/A_{ol}$, which is in microvolts. Therefore, signals as small as a few millivolts can be rectified accurately.</p>
+<h4>(a) Half-wave precision rectifier</h4>
+<pre class="fig">
+                     D
+ Vin o----(+) \       |&gt;|
+              |  &gt;-----+---+----------+--------o Vo
+        +-(-) /               |       RL
+        |                     |       /\/\
+        '---------------------+-------+--- GND
+</pre>
+<p>The input is applied to the non-inverting terminal; the diode follows the op-amp output; the output is fed back from the cathode of the diode (load side) to the inverting input.</p>
+<ul>
+<li><b>Positive half-cycle $(V_{in}>0)$:</b> the op-amp output rises, forward-biasing $D$ once its output is $V_{in}+V_\gamma$. The feedback is closed through $D$, so by the virtual short $V_o=V_{in}$ and the load current is $V_{in}/R_L$.</li>
+<li><b>Negative half-cycle $(V_{in}<0)$:</b> the op-amp output goes negative, $D$ is reverse biased, the feedback loop is open, and no current flows in $R_L$: $V_o=0$.</li>
+</ul>
+$$ V_o=\begin{cases}V_{in} & V_{in}>0\\ 0 & V_{in}\le0\end{cases} \qquad V_{avg}=\frac{V_m}{\pi}. $$
+<p>(The inverting version using $R_1$ and $R_f$ has $V_o=-(R_f/R_1)V_{in}$ for $V_{in}<0$ and zero otherwise.)</p>
+<h4>(b) Full-wave precision rectifier</h4>
+<pre class="fig">
+            Stage 1: inverting half-wave rectifier           Stage 2: summing amplifier
+                         D1                                           R
+ Vin o---+---/\/\---+---|&lt;|---+                    Vin o-----/\/\/---+
+         |    R     |   [A1]  +--+--- V1            V1 o----/\/\/---+--+---[A2]---o Vo
+         |          +---|&gt;|---+  (D2)                         R/2        Rf=R
+         '---------------------------------------&gt; (Vin also goes to the summer through R)
+</pre>
+<p><b>Stage 1</b> is an inverting precision half-wave rectifier of unity gain. It gives $V_1=-V_{in}$ when $V_{in}>0$ (D2 conducts, loop closed through $R_f$) and $V_1=0$ when $V_{in}<0$ (D1 conducts and clamps the op-amp output so the node does not saturate). <b>Stage 2</b> is an inverting summing amplifier that adds $V_{in}$ (through $R$) and $V_1$ (through $R/2$, i.e. weight 2). With feedback resistor $R$:</p>
+$$ V_o=-\left[\frac{R}{R}V_{in}+\frac{R}{R/2}V_1\right]=-V_{in}-2V_1 . $$
+$$ \begin{aligned}
+V_{in}>0:&\quad V_o=-V_{in}-2(-V_{in})=+V_{in}\\
+V_{in}<0:&\quad V_o=-V_{in}-0=-V_{in}=|V_{in}|
+\end{aligned} $$
+<p>The output is therefore $V_o=|V_{in}|$ and the average value is $V_{avg}=2V_m/\pi\approx0.637V_m$ for a sine wave, twice that of the half-wave rectifier, with half the ripple. A capacitor connected across $R_f$ makes the stage an average-responding AC-to-DC converter (e.g. in an AC voltmeter). <b>Applications:</b> AC measurements, peak/average detectors, demodulators in LVDT and carrier systems, and signal absolute-value computation.</p></div>
+
+<div class="qa" id="b2-4"><div class="qhead"><h3>Q. Explain phase-sensitive detectors and their significance.</h3><span class="marks">6 marks</span></div>
+<div class="tags"><span class="tag">Apr 2025 · Q13(b)</span><span class="tag syl">Model paper Q14(b)</span></div>
+<p>A phase-sensitive detector (PSD), also called a synchronous demodulator, is a circuit which gives a DC output proportional to the amplitude of an AC signal and the cosine of its phase difference from a reference signal of identical frequency. The reference is a square wave that drives an electronic switch (or a multiplier). In the positive half-cycle of the reference the switch connects the signal directly to the output filter; during the negative half-cycle it connects the inverted signal (provided by a unity-gain inverting amplifier).</p>
+<p>Let the signal be $v_s=V_m\sin(\omega t+\phi)$ and the reference square wave be $\text{sgn}(\sin\omega t)$. The average switch output, after full-wave synchronous rectification and low-pass filtering, is</p>
+$$ V_{dc}=\frac{1}{\pi}\left[\int_0^{\pi}V_m\sin(\theta+\phi)\,d\theta\right]\ \text{(half-cycle average of the switched signal)}\ \Rightarrow\ V_{dc}=\frac{2V_m}{\pi}\cos\phi. $$
+<p><b>Significance.</b> (i) The output tells both the amplitude and the phase ($\phi=0$ gives maximum positive output, $\phi=90^\circ$ zero, $\phi=180^\circ$ maximum negative), so it can be used for <b>phase measurement</b>; (ii) it <b>demodulates</b> amplitude-modulated and suppressed-carrier signals with sign discrimination, e.g. the output of LVDT or carrier-bridge systems where the sign tells the direction of displacement; (iii) it <b>rejects noise</b>, because noise not at the reference frequency is not rectified coherently and averages to zero; it is the heart of the lock-in amplifier, with which signals thousands of times smaller than the noise can be recovered; (iv) it rejects quadrature components, such as the residual out-of-phase voltage in an LVDT. Implemented with CMOS analog switches, diode ring modulators, or analog multiplier ICs (such as AD630).</p></div>
+
+<div class="qa" id="b2-5"><div class="qhead"><h3>Q. Explain different types of actuators / the operation of any (two) actuators with schematic diagram, and mention their industrial applications.</h3><span class="marks">8 – 14 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q13(a)/Q14(a)</span><span class="tag">May 2024 · Q13(b), Q14(b)</span><span class="tag">Apr 2025 · Q14(a)</span><span class="tag">Apr 2026 · Q14(a) (10)</span><span class="tag syl">Model paper Q13(a)</span></div>
+<p>An <b>actuator</b> is a device that converts the controller's low-power signal into a mechanical output (force, torque or displacement) which operates the final control element. Actuators are classified by the energy source as <b>electrical, pneumatic and hydraulic</b>.</p>
+<h4>1. Electrical actuators</h4>
+<p><b>Solenoid.</b> A solenoid consists of a coil wound on a former, with a soft-iron plunger free to move in the bore against a return spring. When current passes through the coil, a magnetic field is established and the plunger is pulled inward with a force $F=\tfrac{1}{2}I^{2}\,dL/dx$; when the current is removed, the spring returns the plunger. It is used for on/off actuation of pneumatic and hydraulic directional valves, door locks and relays. <b>Applications:</b> solenoid valves for water and gas, relay contacts, and automotive starter engagement.</p>
+<pre class="fig">
+   coil ~~~~~~~~     spring        Output: linear motion of plunger
+  ---|||||||||||---[///////]--&gt; stroke
+   (energised: plunger pulled in)
+</pre>
+<p><b>DC servo motor.</b> A DC motor produces torque $T=K_tI_a$ and back-emf $E_b=K_e\omega$ with $V=E_b+I_aR_a$, so its speed $\omega=(V-I_aR_a)/K_e$ can be controlled by armature voltage. Used with a tachogenerator and position sensor, it forms a servo giving precise speed/position control, driving valve stems through a gearbox. <b>Applications:</b> robot joints, conveyors, positioning of motorised valves and machine tool axes.</p>
+<p><b>Stepper motor.</b> A stepper motor moves through a fixed step angle for each input pulse: $\theta_s=\dfrac{360^\circ}{m\,N_r}$ ($m$ = phases/stator-pole sets, $N_r$ = rotor teeth); speed in steps/s is the pulse frequency. It is used in open-loop position control without feedback. <b>Applications:</b> printers, CNC, valve positioners, robotics.</p>
+<p><b>AC motors / variable frequency drives.</b> Induction motors with speed $N_s=120f/P$ are used with VFDs for pump and fan control, saving energy.</p>
+<h4>2. Pneumatic actuators</h4>
+<pre class="fig">
+   signal air (3-15 psi) --&gt;  |=== diaphragm ===|  area Ad
+                              |   spring (k)   |
+                              |      |         |
+                              |    stem  ---&gt; to valve plug
+</pre>
+<p>In the commonest type, the spring-opposed diaphragm actuator, the signal air pressure $P$ acts on a flexible diaphragm of area $A_d$ producing force $F=PA_d$, which is balanced by a spring force $kx$, so the stem travel is $x=PA_d/k$, directly proportional to the 3–15 psi signal. In air-to-open (reverse acting) or air-to-close (direct acting) form it positions the valve plug. Cylinders with pistons (single or double acting) are used when longer strokes and higher forces are needed. <b>Applications:</b> control valves in process plants, dampers, clamping and pick-and-place in assembly lines. Benefits: simple, low-cost, fast, explosion-safe; limitation: compressibility reduces stiffness.</p>
+<h4>3. Hydraulic actuators</h4>
+<pre class="fig">
+ Reservoir --[Pump]--[Relief valve]--[Directional control valve]--&gt; Cylinder (piston, rod)
+      ^                                                                |
+      '---------------------- return line &lt;---------------------------'
+</pre>
+<p>A pump driven by an electric motor draws oil from a reservoir and delivers it at high pressure through a relief valve and a (servo or solenoid) directional valve to a double-acting cylinder; the piston moves under pressure $P$ producing force $F=P\,A$ and velocity $v=Q/A$ for flow $Q$. Because oil is practically incompressible, hydraulic systems have high stiffness, large force-to-size ratio and accurate positioning. <b>Applications:</b> steel rolling mills, hydraulic presses, injection moulding machines, excavators, and operation of large valves and flaps in power plants.</p></div>
+
+<div class="qa" id="b2-6"><div class="qhead"><h3>Q. Illustrate hydraulic actuating systems with the components used in industries.</h3><span class="marks">6 marks</span></div>
+<div class="tags"><span class="tag">Apr 2025 · Q14(b)</span></div>
+<p>A hydraulic actuating system converts hydraulic (fluid) power into linear or rotary mechanical power using a pressurised incompressible fluid such as mineral oil, and consists of the following components:</p>
+<ol>
+<li><b>Reservoir (tank):</b> stores oil, dissipates heat and allows air and contaminants to settle.</li>
+<li><b>Pump:</b> driven by an electric motor or engine; gear, vane or piston pump (positive displacement) that delivers flow $Q$ at pressure $P$; hydraulic power is $P\cdot Q$.</li>
+<li><b>Filters/strainers:</b> remove particles from the oil to protect precision valves.</li>
+<li><b>Pressure relief valve:</b> sets the maximum system pressure and bypasses excess oil to the tank.</li>
+<li><b>Accumulator:</b> stores energy and smooths pressure pulsations.</li>
+<li><b>Direction-control valve (DCV):</b> manually, solenoid or servo-operated spool valve that directs oil to either end of the cylinder.</li>
+<li><b>Flow-control valve:</b> controls actuator speed by metering the flow.</li>
+<li><b>Actuators:</b> linear <i>cylinders</i> (single or double acting) giving $F=PA$, and rotary <i>hydraulic motors</i> giving torque $T=P\,D_m/2\pi$.</li>
+<li><b>Piping, hoses, seals and heat exchangers.</b></li>
+</ol>
+<p>Pump-to-cylinder operation: the pump pressurises oil, the DCV is shifted by a solenoid (from the PLC), oil enters the cap end, the piston extends against the load with speed $v=Q/A$, and the rod-end oil returns to the tank; reversing the valve retracts the piston. Excess pump flow returns to the tank through the relief valve. <b>Industrial uses:</b> rolling mills, metal presses, plastic injection moulding, material-handling equipment (cranes, forklifts), machine-tool feed drives and heavy valve actuation. They provide large forces with fast, stiff, precise control, but need cleanliness, are costly and may leak.</p></div>
+
+<div class="qa" id="b2-7"><div class="qhead"><h3>Q. Write short notes on fluid valves.</h3><span class="marks">4 – 6 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q14(b)</span><span class="tag">Apr 2026 · Q14(b)</span></div>
+<p>Fluid valves are the most common <b>final control elements</b> in process industries. A control valve alters the flow of fluid by changing the area of a restriction in the pipe, thus altering the pressure drop and the flow rate. A valve consists of a <b>body</b> (with ports) containing a <b>plug/disc/ball</b> and <b>seat</b>, and a <b>stem</b> connected to an actuator. The flow is $Q=C_v\sqrt{\Delta P/G}$, where $C_v$ is the valve flow coefficient (gallons/min of water at 1 psi drop for the fully-open valve), $\Delta P$ is the pressure drop across the valve, $G$ is the specific gravity.</p>
+<p><b>Types.</b> <i>Globe valve</i> – the flow passes through an S-shaped body with a plug moving towards or away from the seat; good throttling, available as single/double seated, used for general control. <i>Gate valve</i> – a wedge gate slides across the flow; low pressure drop but poor for throttling, used for on/off. <i>Ball valve</i> – a ball with a bore rotates 90° for quick shut-off with tight sealing. <i>Butterfly valve</i> – a disc rotates in the pipe; compact and cheap for large pipes and low pressure drops. <i>Diaphragm valve</i> – a flexible diaphragm closes the flow; good for corrosive, viscous or slurry fluids. <i>Plug/needle valves</i> – fine flow control.</p>
+<p><b>Flow characteristics.</b> The relation between the stem position and flow (at constant pressure drop) is the <i>inherent characteristic</i>. <b>Quick-opening:</b> large flow change for small initial travel, used for on/off. <b>Linear:</b> flow is proportional to travel. <b>Equal percentage:</b> equal increments of travel produce equal percentage changes of existing flow, $Q=Q_{min}R^{x}$, where $R$ is rangeability; it is the most used in process control because it compensates for the changing pressure drop in a piping system. Valves can be <b>air-to-open or air-to-close</b> (fail-closed or fail-open) chosen on the basis of safety. A valve positioner improves accuracy by compensating friction.</p></div>
+
+</main></div>
+</body>
+</html>

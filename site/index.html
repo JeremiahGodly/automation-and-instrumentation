@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EET468 Industrial Instrumentation & Automation – PYQ Answers</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="script.js"></script>
+</head>
+<body>
+<div class="layout"><main>
+
+<h1 class="title">EET468 · Industrial Instrumentation &amp; Automation</h1>
+<p class="lead">KTU 2019 Scheme · S8 EEE · Detailed answers to the previous-year question papers (June 2023, May 2024, April 2025, April 2026), combined with the complete syllabus theory so that nothing is missed.</p>
+
+<h2 id="modules">Modules</h2>
+<div class="grid">
+<a class="card" href="module1.html"><b>Module 1</b><span>Sensors &amp; Transducers – process loop, time response, potentiometer, capacitive DP, hot-wire, tachometer, phase</span></a>
+<a class="card" href="module2.html"><b>Module 2</b><span>Signal conditioning &amp; final control – amplifiers, rectifiers, PSD, actuators, valves</span></a>
+<a class="card" href="module3.html"><b>Module 3</b><span>Data transmission, fieldbus, wireless, virtual instrumentation, graphical programming</span></a>
+<a class="card" href="module4.html"><b>Module 4</b><span>PLC hardware, ladder logic, timers, counters, sequence programs</span></a>
+<a class="card" href="module5.html"><b>Module 5</b><span>SCADA, RTU/MTU/HMI, DNP3, IEC 101, DCS architecture and modes</span></a>
+</div>
+
+<h2 id="how">How each module page is organised</h2>
+<p>Every module page has three parts. <b>Part 1 – Syllabus theory</b> covers <i>all</i> topics listed in the KTU syllabus for that module, including those that have not yet been asked in the available papers (for example lock-in, carrier and isolation amplifiers, pneumatic actuators, WLAN, IEC 60870-5-101, control modes). <b>Part 2 – Part A answers</b> gives 3-mark answers. <b>Part 3 – Part B answers</b> gives full-length answers. Each question carries tags such as <span class="tag">May 2024 · Q11(a)</span> showing in which papers it appeared; <span class="tag syl">Model</span> tags indicate the KTU model question paper. Questions asked repeatedly are the most important – learn them first. Use the search box on each page to find a question quickly.</p>
+
+<h2 id="freq">Most repeated questions (high-priority list)</h2>
+<table>
+<tr><th>Topic</th><th>Appeared in</th><th>Go to</th></tr>
+<tr><td>Process control loop block diagram</td><td>May 24, Apr 25 (+ model)</td><td><a href="module1.html#b1-1">M1</a></td></tr>
+<tr><td>Self-regulation / human-aided / automatic control</td><td>Jun 23, Apr 26</td><td><a href="module1.html#b1-2">M1</a></td></tr>
+<tr><td>First- and second-order sensor response</td><td>Jun 23, May 24 (A), Apr 25, Apr 26 (A)</td><td><a href="module1.html#b1-3">M1</a></td></tr>
+<tr><td>Transducer selection criteria / characteristics</td><td>Jun 23, May 24, Apr 25, Apr 26</td><td><a href="module1.html#b1-4">M1</a></td></tr>
+<tr><td>Capacitive differential pressure transducer</td><td>Jun 23, May 24, Apr 26</td><td><a href="module1.html#b1-5">M1</a></td></tr>
+<tr><td>Resistance potentiometer</td><td>Jun 23, Apr 25 (A), Apr 26</td><td><a href="module1.html#b1-6">M1</a></td></tr>
+<tr><td>Log amplifier derivation</td><td>Jun 23, Apr 26 (+ A: May 24, Apr 25)</td><td><a href="module2.html#b2-1">M2</a></td></tr>
+<tr><td>Differential / instrumentation amplifier</td><td>Jun 23, May 24</td><td><a href="module2.html#b2-2">M2</a></td></tr>
+<tr><td>Precision rectifiers (half and full wave)</td><td>May 24, Apr 25, Apr 26</td><td><a href="module2.html#b2-3">M2</a></td></tr>
+<tr><td>Electrical / other actuators</td><td>Every paper</td><td><a href="module2.html#b2-5">M2</a></td></tr>
+<tr><td>Fluid valves</td><td>Jun 23, Apr 26</td><td><a href="module2.html#b2-7">M2</a></td></tr>
+<tr><td>Fibre optic transmission</td><td>Jun 23, Apr 26</td><td><a href="module3.html#b3-1">M3</a></td></tr>
+<tr><td>Virtual instrument architecture</td><td>May 24, Apr 25, Apr 26 (+ Part A advantages in every paper)</td><td><a href="module3.html#b3-5">M3</a></td></tr>
+<tr><td>Radio vs wireless communication</td><td>Jun 23, Apr 25, Apr 26 (advantages)</td><td><a href="module3.html#b3-3">M3</a></td></tr>
+<tr><td>Counters / timers in PLC</td><td>Every paper</td><td><a href="module4.html#b4-5">M4</a></td></tr>
+<tr><td>PLC block diagram</td><td>May 24, Apr 25, Apr 26</td><td><a href="module4.html#b4-1">M4</a></td></tr>
+<tr><td>Ladder diagrams (AND, OR, NAND, XOR, pump-heater)</td><td>Jun 23, May 24, Apr 25, Apr 26</td><td><a href="module4.html#b4-4">M4</a></td></tr>
+<tr><td>DCS architecture</td><td>Every paper</td><td><a href="module5.html#b5-1">M5</a></td></tr>
+<tr><td>SCADA architecture</td><td>May 24, Apr 25, Apr 26</td><td><a href="module5.html#b5-2">M5</a></td></tr>
+<tr><td>DNP3 / IEC 101 protocol</td><td>Jun 23, May 24 (A), Apr 25</td><td><a href="module5.html#b5-5">M5</a></td></tr>
+<tr><td>RTU, MTU and HMI roles</td><td>Every paper (Part A)</td><td><a href="module5.html#a5-1">M5</a></td></tr>
+</table>
+
+<h2 id="eq">Key equations at a glance</h2>
+<table>
+<tr><th>Topic</th><th>Equation</th></tr>
+<tr><td>First-order step response</td><td>$b(t)=b_f+(b_i-b_f)e^{-t/\tau}$</td></tr>
+<tr><td>Second-order (underdamped)</td><td>$y(t)=1-\dfrac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^{2}}}\sin(\omega_d t+\phi)$, $\ \omega_d=\omega_n\sqrt{1-\zeta^2}$</td></tr>
+<tr><td>Potentiometer</td><td>$e_o=E\,\dfrac{x}{x_t}$</td></tr>
+<tr><td>Capacitive DP (ratio)</td><td>$E_o=E\,\dfrac{C_2-C_1}{C_1+C_2}=-E\,\dfrac{x}{d_0}$</td></tr>
+<tr><td>VR tachometer</td><td>$f=\dfrac{N_t\,n}{60}$</td></tr>
+<tr><td>Log amplifier</td><td>$V_o=-V_T\ln\!\left(\dfrac{V_{in}}{RI_S}\right)$</td></tr>
+<tr><td>Instrumentation amplifier</td><td>$V_o=\dfrac{R_3}{R_2}\left(1+\dfrac{2R_1}{R_G}\right)(V_2-V_1)$</td></tr>
+<tr><td>Charge amplifier</td><td>$V_o=-\dfrac{Q}{C_f}$</td></tr>
+<tr><td>PSD output</td><td>$V_{dc}=\dfrac{2V_m}{\pi}\cos\phi$</td></tr>
+<tr><td>Full-wave precision rectifier</td><td>$V_o=-(V_{in}+2V_1)=|V_{in}|$</td></tr>
+<tr><td>Control valve flow</td><td>$Q=C_v\sqrt{\Delta P/G}$</td></tr>
+<tr><td>PLC timer delay</td><td>$T=\text{PRE}\times\text{time base}$</td></tr>
+</table>
+
+<div class="note"><b>Note on the source papers:</b> the supplied KTU "answer key" PDFs contain only the marking-scheme points (many of their diagrams are images). The answers on these pages expand each point into full explanations, add the standard derivations and diagrams (drawn as text sketches), and use the KTU model question paper to cross-check coverage. Always draw neat diagrams in the exam, because marks are allotted separately for the figure.</div>
+
+</main></div>
+</body>
+</html>

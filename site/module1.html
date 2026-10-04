@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module 1 – Sensors & Transducers | EET468</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="script.js"></script>
+</head>
+<body>
+<div class="layout"><main>
+
+<h1 class="title">Module 1 · Sensors and Transducers</h1>
+<p class="lead">Process control loop · sensor time response · transducer characteristics and selection · potentiometer · capacitive differential pressure · hot-wire anemometer · variable reluctance tachometer · phase measurement.</p>
+
+<input id="search" class="search" placeholder="Search questions in this module (e.g. tachometer, second order)…">
+
+<div class="toc"><b>Contents</b>
+<ul>
+<li><a href="#theory">Part 1 – Syllabus theory (all topics)</a></li>
+<li><a href="#partA">Part 2 – Part A short answers (3 marks)</a></li>
+<li><a href="#partB">Part 3 – Part B long answers (14 marks)</a></li>
+</ul></div>
+
+<!-- ===================== THEORY ===================== -->
+<h2 id="theory">Part 1 · Syllabus Theory</h2>
+
+<div class="topic" id="t-process">
+<h3>1.1 Introduction to process control</h3>
+<p>A <b>process</b> is any operation or series of operations in which a material or energy variable is changed from one state to another – for example heating water in a tank, mixing two liquids to a fixed concentration, or maintaining the level of liquid in a reservoir. <b>Process control</b> is the art and science of keeping the important variables of such a process (temperature, pressure, flow, level, pH, speed and so on) at desired values in spite of disturbances. Modern industry depends on process control because it improves product quality, saves raw material and energy, increases safety and reduces the need for continuous human supervision.</p>
+<p>Every automatic control loop is built from the same functional elements. The <b>process</b> is the plant being controlled. The <b>controlled variable</b> $c$ (also called the process variable) is the quantity we want to keep constant. The <b>sensor</b> and <b>transducer</b> together form the <b>measuring element</b> that converts the controlled variable to a standard signal $b$, such as a 4–20 mA current or 1–5 V. The <b>set point</b> $r$ is the desired value. The <b>error detector</b> forms the error $e = r - b$. The <b>controller</b> uses the error to produce a corrective signal. The <b>final control element</b> (valve, motor, heater etc.) receives this signal and changes the <b>manipulated variable</b> $m$ (e.g. flow of steam) which acts upon the process. Any outside influence that tends to change the controlled variable (change in inlet flow, ambient temperature, supply voltage) is the <b>load</b> or <b>disturbance</b>.</p>
+<pre class="fig">
+   Set point r
+       |        +                                         Load / disturbance
+       v      _____        ____________      ____________        |
+      ( + )-->| Error|----->| CONTROLLER |--->| FINAL CONTROL|     v
+       ^ -    |detect|      |  (P,PI,PID)|    |   ELEMENT    |--&gt;[ PROCESS ]--+--&gt; Controlled
+       |      '------'      '------------'    '--------------'                |    variable c
+       |  b                                                                    |
+       |       ___________      ___________                                    |
+       '------|TRANSDUCER |&lt;---|  SENSOR   |&lt;-----------------------------------'
+              |(signal cond)|   |(measuring)|
+              '------------'   '-----------'
+</pre>
+<p>The controller output is generated from the error using one of the control modes. For a <b>proportional–integral–derivative (PID)</b> controller,</p>
+$$ m(t) = K_p\,e(t) + \frac{K_p}{T_i}\int_0^{t} e(\tau)\,d\tau + K_p T_d\,\frac{de(t)}{dt} + m_0 $$
+<p>where $K_p$ is the proportional gain, $T_i$ the integral (reset) time, $T_d$ the derivative (rate) time and $m_0$ the controller bias. The proportional action responds to the present error, the integral action removes the steady-state offset by accumulating past error, and the derivative action anticipates future error from its rate of change.</p>
+</div>
+
+<div class="topic" id="t-timeresp">
+<h3>1.2 Sensor time response – first and second order</h3>
+<p>An ideal sensor would follow its input instantaneously. In reality every sensor stores energy (thermal mass of a thermocouple, inertia of a diaphragm, capacitance of a circuit), so the output lags the input. The way the output moves towards its final value after a sudden change of input is called the <b>time response</b>, and it is found by solving the differential equation describing the sensor. Sensors are modelled as <b>zero order</b> (no lag, e.g. a potentiometer), <b>first order</b> (one energy-storage element, e.g. a bare thermocouple or an RC network) and <b>second order</b> (two energy-storage elements that can exchange energy, e.g. a spring–mass accelerometer or a pressure gauge with liquid in its tube).</p>
+
+<h4>First-order response</h4>
+<p>Suppose the input changes suddenly at $t = 0$ from $c_i$ to $c_f$ so that the static transfer function gives a sensor output $b_i$ before and $b_f$ after the step. The first-order differential equation is</p>
+$$ \tau\,\frac{db(t)}{dt} + b(t) = b_f, \qquad b(0)=b_i $$
+<p>where $\tau$ is the <b>time constant</b> of the sensor. Its solution is</p>
+$$ b(t) = b_f + (b_i - b_f)\,e^{-t/\tau} \quad\Longleftrightarrow\quad \frac{b(t)-b_i}{b_f-b_i} = 1 - e^{-t/\tau} $$
+<p>The right-hand form is the <b>fractional response</b>, which is independent of the sensor type. After one time constant the output has covered $63.2\%$ of the total change; after $2\tau$ it is $86.5\%$; after $3\tau$ it is $95\%$ and after $5\tau$ about $99.3\%$, which is normally regarded as settled. A smaller $\tau$ means a faster sensor.</p>
+<pre class="fig">
+ b(t)
+ bf |                 ______________________  step input response (first order)
+    |           .-''''
+    |        .-'   <-- 63.2% at t = tau
+    |      .'
+    |    .'
+ bi |__.'___________________________________ t
+    0   tau   2tau   3tau   4tau   5tau
+</pre>
+<p><b>Ramp input.</b> If the input rises linearly, $c(t)=c_i + R\,t$, and the sensor has static sensitivity $K$, the equation becomes $\tau\,\dot b + b = K R t$ and the response (after the transient dies away) is</p>
+$$ b(t) = K R\,(t - \tau) + K R\,\tau\,e^{-t/\tau} $$
+<p>The steady output is the ramp delayed by $\tau$, so a constant <b>lag (dynamic) error</b> $e_{ss}=K R\tau$ remains. This is why fast-changing quantities need sensors with small time constants.</p>
+
+<h4>Second-order response</h4>
+<p>For a second-order sensor with natural frequency $\omega_n$ and damping ratio $\zeta$ the governing equation for a step to $b_f$ is</p>
+$$ \frac{1}{\omega_n^{2}}\frac{d^{2}b}{dt^{2}} + \frac{2\zeta}{\omega_n}\frac{db}{dt} + b = b_f $$
+<p>Here $\omega_n=\sqrt{k/m}$ is the undamped natural frequency (rad/s) and $\zeta = c/(2\sqrt{km})$ is the damping ratio. The nature of the solution depends on $\zeta$:</p>
+<ul>
+<li><b>Underdamped ($0<\zeta<1$):</b> the output overshoots and oscillates about $b_f$ before settling.
+$$ b(t) = b_f\left[1 - \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^{2}}}\,\sin\!\left(\omega_d t + \phi\right)\right],\quad \omega_d=\omega_n\sqrt{1-\zeta^{2}},\ \ \phi=\cos^{-1}\zeta $$</li>
+<li><b>Critically damped ($\zeta=1$):</b> fastest response with no overshoot: $b(t)=b_f\left[1-(1+\omega_n t)e^{-\omega_n t}\right]$.</li>
+<li><b>Overdamped ($\zeta>1$):</b> sluggish, non-oscillatory response, equal to the sum of two exponentials with time constants $1/(\zeta\pm\sqrt{\zeta^2-1})\omega_n$.</li>
+</ul>
+<p>For the underdamped case the peak time and the maximum percentage overshoot are</p>
+$$ t_p = \frac{\pi}{\omega_d}, \qquad M_p = \exp\!\left(\frac{-\pi\zeta}{\sqrt{1-\zeta^{2}}}\right)\times 100\% , \qquad t_s \approx \frac{4}{\zeta\omega_n}\ (2\%\ \text{criterion}) $$
+<p>Most practical instruments are designed with $\zeta\approx 0.6$–$0.7$, which gives a fast rise with only about $5\%$–$10\%$ overshoot.</p>
+<pre class="fig">
+ b(t)/bf
+  1.4|     zeta=0.2 (large overshoot, ringing)
+     |      ,-.
+  1.2|     /   '.   ,-.__.--.___
+     |    / zeta=0.6 '.___.-'
+  1.0|---/------_______________________  zeta=1 (critical)
+     |  /  _.-'
+     | / .'     zeta=2 (overdamped - slow)
+  0.0|/'___________________________________ t
+</pre>
+</div>
+
+<div class="topic" id="t-char">
+<h3>1.3 Transducers – characteristics and choice</h3>
+<p>A <b>transducer</b> converts one form of energy or physical quantity into another, usually into an electrical signal that can be processed. A sensor is the sensing part of the transducer; the transducer additionally contains the conversion element and sometimes conditioning. Transducers are classified as <b>active</b> (self-generating, e.g. thermocouple, piezoelectric, photovoltaic) and <b>passive</b> (need external excitation, e.g. potentiometer, strain gauge, LVDT, capacitive), as <b>analog</b> and <b>digital</b>, and as primary or secondary transducers.</p>
+<p>The characteristics fall into two groups. <b>Static characteristics</b> describe behaviour when the input is steady: <i>range and span</i> (the limits over which the instrument works), <i>sensitivity</i> $S = \Delta\text{output}/\Delta\text{input}$, <i>linearity</i> (maximum deviation from the best straight line, as % of full scale), <i>accuracy</i> (closeness to the true value), <i>precision / repeatability</i> (closeness of repeated readings), <i>resolution</i> (smallest change detected), <i>threshold</i> and <i>dead zone</i>, <i>hysteresis</i> (different outputs for rising and falling inputs), <i>drift</i> and <i>stability</i> and <i>loading effect</i>. <b>Dynamic characteristics</b> describe behaviour when the input varies with time: <i>speed of response</i>, <i>time constant</i>, <i>rise and settling time</i>, <i>frequency response / bandwidth</i>, <i>fidelity</i> and <i>dynamic error</i>.</p>
+<p>The <b>choice of a transducer</b> for a given industrial task is a compromise between several factors. The operating principle must suit the measured variable; the <b>range</b> must cover the expected values with some margin; the <b>sensitivity</b> must give a large enough output but should not be sensitive to unwanted variables (cross-sensitivity); the transducer should have the required <b>accuracy, linearity and resolution</b>; the <b>dynamic response</b> (frequency response, time constant) must be quick enough for the speed of the process; the <b>loading effect</b> on the measured system must be negligible; <b>environmental compatibility</b> (temperature, humidity, vibration, corrosion, explosive atmosphere, EMI); <b>electrical output</b> format and the need for excitation and signal conditioning; <b>reliability, ruggedness, life and maintenance</b>; and finally <b>cost, size, weight and availability</b>.</p>
+</div>
+
+<div class="topic" id="t-pot">
+<h3>1.4 Displacement measurement using resistance potentiometer</h3>
+<p>The resistance potentiometer ("POT") is a simple <b>passive</b> transducer that converts linear or angular displacement into a voltage by dividing an excitation voltage. It consists of a resistive element of total resistance $R_p$ and length $x_t$ (wire-wound, carbon film, cermet, conductive plastic or thin metal film) with a sliding contact called the <b>wiper</b>. The wiper is mechanically coupled to the object whose motion is being measured; the motion may be translatory or rotary (single-turn or multi-turn helical). The element can be excited by DC or AC.</p>
+<p>For a wiper displaced by $x$ from one end, and an infinitely high load resistance, the output is</p>
+$$ e_o = E\,\frac{R_x}{R_p} = E\,\frac{x}{x_t} $$
+<p>Thus the output is directly proportional to displacement and the sensitivity is $E/x_t$ V/m (or $E/\theta_t$ V/rad for rotary pots). In practice the measuring circuit has a finite load resistance $R_L$ which loads the pot, and the output becomes non-linear. With $r = x/x_t$:</p>
+$$ \frac{e_o}{E} = \frac{r}{1 + \dfrac{R_p}{R_L}\,r\,(1-r)} $$
+<p>The loading error is largest at $r = 0.5$ and is reduced by choosing $R_L \gg R_p$ (typically $R_L/R_p\ge 10$), by using a high-input-impedance buffer or voltmeter, or by using a pot with a specially shaped (non-uniform) element. A wire-wound pot also has finite <b>resolution</b> of $1/N$ (where $N$ is the number of turns) because the wiper moves from turn to turn in steps.</p>
+<p><b>Advantages:</b> simple, cheap, high output voltage (no amplification needed), can measure large strokes, same device for linear and angular motion. <b>Disadvantages:</b> mechanical wear and friction (loading of the measured object), limited bandwidth because of inertia and wiper bounce, noise from wiper contact, finite resolution and loading error.</p>
+</div>
+
+<div class="topic" id="t-cap">
+<h3>1.5 Capacitive differential pressure measurement</h3>
+<p>The capacitive differential pressure (DP) transducer is a very popular industrial sensor for measuring the difference between two pressures, and, from that, flow (across an orifice) and level. It is built around a taut <b>sensing diaphragm</b> placed between two fixed perforated electrodes (plates $P_1$ and $P_2$), forming <b>two capacitors</b> $C_1$ and $C_2$ with the diaphragm as the common movable plate. The space inside the capsule is filled with silicone oil and each side is isolated from the process fluid by a corrugated isolating diaphragm so that the process pressure $P_1$ on one side and $P_2$ on the other are transmitted to the sensing diaphragm through the oil.</p>
+<p>When $P_1=P_2$ the sensing diaphragm is exactly midway between the fixed plates and $C_1=C_2$. If $P_1>P_2$ the diaphragm deflects towards the low-pressure plate by a distance $x$ proportional to the pressure difference, $x = \dfrac{A_d}{k}\,\Delta P$ where $A_d$ is the effective diaphragm area and $k$ its stiffness. With plate area $A$, permittivity $\varepsilon$ and rest gap $d_0$:</p>
+$$ C_1 = \frac{\varepsilon A}{d_0 - x}, \qquad C_2 = \frac{\varepsilon A}{d_0 + x} $$
+<p>An AC voltage $E$ is applied across the two outer plates, so the capacitors act as a series voltage divider. The voltage across $C_1$ and $C_2$ are</p>
+$$ E_1 = E\,\frac{C_2}{C_1 + C_2}, \qquad E_2 = E\,\frac{C_1}{C_1+C_2} $$
+<p>At balance $C_1=C_2$ and $E_1=E_2=E/2$. The output is the difference of the two voltages:</p>
+$$ \begin{aligned} E_o = E_1 - E_2 &= E\,\frac{C_2 - C_1}{C_1 + C_2} \\ &= E\;\frac{\dfrac{1}{d_0+x}-\dfrac{1}{d_0-x}}{\dfrac{1}{d_0+x}+\dfrac{1}{d_0-x}} = -E\,\frac{x}{d_0} \end{aligned} $$
+<p>So the output (magnitude) is linearly proportional to the diaphragm displacement and hence to $\Delta P$: $|E_o| = E\,\dfrac{A_d}{k\,d_0}\,\Delta P$. The ratio form makes the output linear, independent of $\varepsilon$ and $A$, and therefore insensitive to temperature changes in the dielectric. The AC output is demodulated and amplified to give 4–20 mA. The sign of $E_o$ (phase relative to $E$) gives the direction of the difference.</p>
+<p><b>Advantages:</b> very high sensitivity, excellent linearity, small diaphragm travel (stiff, so high natural frequency and overload protection), low hysteresis and good stability. <b>Disadvantages:</b> stray capacitance of cables must be controlled, needs AC excitation and signal-conditioning electronics. <b>Applications:</b> flow measurement with orifice plates/venturi, liquid level in closed tanks, filter clogging, and gauge/vacuum measurement.</p>
+</div>
+
+<div class="topic" id="t-hot">
+<h3>1.6 Flow measurement using hot-wire anemometer</h3>
+<p>A hot-wire anemometer measures the velocity (and hence flow rate) of a gas by sensing the cooling effect of the moving fluid on an electrically heated fine wire (typically 5 µm tungsten or platinum, about 1–2 mm long) mounted between two prongs. The principle is heat balance: the electrical power dissipated in the wire equals the heat carried away by forced convection. Using <b>King's law</b>,</p>
+$$ I^{2}R_w = hA\,(T_w - T_f) = \left(a + b\sqrt{v}\right)(T_w - T_f) $$
+<p>where $I$ is the wire current, $R_w$ the wire resistance at temperature $T_w$, $T_f$ the fluid temperature, $A$ the surface area, $h$ the film heat-transfer coefficient, $v$ the flow velocity and $a$, $b$ constants found by calibration. As velocity rises, more heat is lost, the wire cools and its resistance changes (since $R_w = R_0[1+\alpha(T_w-T_0)]$), so velocity is deduced from either the voltage or the current required.</p>
+<h4>Modes of operation</h4>
+<p><b>(i) Constant-current mode.</b> The wire is driven from a constant-current source through a Wheatstone bridge. As the velocity increases the wire temperature and hence its resistance fall, unbalancing the bridge; the bridge output voltage is a measure of velocity. It is simple, but the thermal inertia of the wire gives a slow response (a compensating circuit is needed beyond a few hundred hertz) and the wire may burn out at very low flow. <b>Advantage:</b> simple circuit, low noise. <b>(ii) Constant-temperature mode.</b> The wire is one arm of a bridge; a feedback amplifier increases the bridge current so that the wire resistance (and temperature) is held constant. The bridge/amplifier voltage required then is a measure of velocity, $E^{2} = R_w\,(a + b\sqrt{v})(T_w-T_f)$. This mode has a very fast response (up to hundreds of kHz) and is protected against burnout, and is therefore most widely used in turbulence studies.</p>
+<pre class="fig">
+           Constant-current hot-wire bridge             Constant-temperature
+      Is ---+------------+                                  +--[ R2 ]--+
+            |            |                           +-[Amp]-+          |
+          [R1]        [Hot wire Rw]   -> detector    |       [R1]    [Rw]<- air flow
+            |            |                           +--------+---------+
+            '---[R2]-----'                      Amplifier supplies the bridge current</pre>
+<p><b>Applications:</b> airflow in ducts and wind tunnels, turbulence measurement, ventilation and clean-room monitoring, and gas-flow metering. Its limits are the fragility of the wire and sensitivity to dirt and to fluid temperature changes.</p>
+</div>
+
+<div class="topic" id="t-vr">
+<h3>1.7 Speed measurement – variable reluctance tachometer</h3>
+<p>A variable reluctance (VR) tachometer measures rotational speed without contact. It consists of a permanent magnet with a pick-up coil wound on it (the "pole piece"), placed near a rotating <b>toothed wheel</b> made of ferromagnetic material, which is fixed to the shaft. As each tooth passes the pole piece the air gap, and thus the <b>reluctance</b> of the magnetic circuit, falls; when a gap between teeth passes, the reluctance rises. The flux $\phi$ linking the coil therefore varies periodically.</p>
+<p>By Faraday's law the induced emf is</p>
+$$ e = -N\,\frac{d\phi}{dt} $$
+<p>where $N$ is the number of turns of the coil. The emf is a train of nearly sinusoidal pulses whose <b>frequency</b> and <b>amplitude</b> are both proportional to speed. If the wheel has $N_t$ teeth and rotates at $n$ r.p.m., the frequency of the voltage is</p>
+$$ f = \frac{N_t\, n}{60}\ \text{Hz} \quad\Longrightarrow\quad n = \frac{60 f}{N_t}\ \text{rpm} $$
+<p>The pulses are shaped by a Schmitt trigger and counted over a fixed gate time by a digital counter to display speed. Since the information is in frequency and not amplitude, the output is immune to amplitude variations due to gap changes; but at very low speeds the amplitude becomes too small to detect, so a VR tachometer cannot measure zero speed. <b>Advantages:</b> rugged, no power supply, non-contact, simple and digital-compatible output. <b>Disadvantages:</b> poor low-speed performance and sensitivity to air-gap and stray magnetic fields. Used for engine, turbine and motor speed.</p>
+</div>
+
+<div class="topic" id="t-phase">
+<h3>1.8 Phase measurement – analog and digital</h3>
+<p>The phase difference $\phi$ between two signals of the same frequency is of great interest in power-factor measurement, impedance and bridge measurements, LVDT and lock-in systems, and flow measurement by ultrasonic or Coriolis methods.</p>
+<p><b>Analog method.</b> Each sinusoid is first converted to a square wave by a <b>zero-crossing detector</b> (comparator). The two square waves set and reset an <b>S–R flip-flop</b> (or are applied to an XOR gate), producing an output pulse train whose width equals the time between the zero crossings of the signals. The pulse height is $V_{cc}$ and the period is $T$. This pulse train is passed through a <b>low-pass filter</b> or averaging meter, which gives a DC voltage</p>
+$$ V_{avg} = V_{cc}\,\frac{\Delta t}{T} = V_{cc}\,\frac{\phi}{360^\circ} \quad\Longrightarrow\quad \phi = 360^\circ\,\frac{V_{avg}}{V_{cc}} $$
+<p>Another analog approach uses a <b>phase-sensitive detector</b> whose average output is proportional to $\cos\phi$ (see Module 2).</p>
+<p><b>Digital method.</b> The flip-flop output gates a high-frequency clock (frequency $f_c$) into a counter. The count during the gate-open time is $N_\phi = f_c\,\Delta t$, while the count for one full period of the signal is $N_T = f_c T$. Hence</p>
+$$ \phi = 360^\circ\,\frac{N_\phi}{N_T} = 360^\circ\, f\,\Delta t $$
+<p>Averaging over many cycles improves accuracy. Digital methods give a direct numerical display, high resolution (depends on clock frequency) and freedom from amplitude and drift errors; the analog method is cheaper and gives a continuous output suitable for recording or feedback.</p>
+<pre class="fig">
+ v1 --[Zero-cross]--> S ,---.
+                         |FF |--> pulses (width = delta t) --> LPF --> V_avg  (analog)
+ v2 --[Zero-cross]--> R '---'            |
+                                   clock-->AND--> COUNTER -> N_phi            (digital)</pre>
+</div>
+
+<!-- ===================== PART A ===================== -->
+<h2 id="partA">Part 2 · Part A – Short Answers (3 marks)</h2>
+
+<div class="qa a" id="a1-1"><div class="qhead"><h3>Define the terms <i>process</i> and <i>process control</i>.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Apr 2026 · Q1</span></div>
+<p>A <b>process</b> is a sequence of operations or events that changes the state of a material or the energy content of a system in order to obtain a desired product or condition. Examples include heating water in a boiler, the manufacture of chemicals, power generation and the filling of a tank. Each process has a number of variables such as pressure, flow, temperature and level that describe its state.</p>
+<p><b>Process control</b> is the automatic regulation of those process variables so that they are held at the required set point (or follow a desired pattern) in spite of disturbances such as a change in load or supply. It does this by measuring the variable, comparing it with the set point, and using the resulting error to adjust a manipulated variable through a final control element. Proper process control gives better quality, safety, energy efficiency and economic operation.</p></div>
+
+<div class="qa a" id="a1-2"><div class="qhead"><h3>What is meant by sensor time response? Draw the step (and ramp) input responses of first-order and second-order sensors.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q1</span><span class="tag">May 2024 · Q2</span><span class="tag">Apr 2026 · Q2</span></div>
+<p>When the input to a sensor is suddenly changed, the output does not change instantly but moves towards its new final value after a delay and in a characteristic manner because of the sensor's internal energy storage. This variation of output with time is the <b>sensor time response</b>. It is obtained by solving the sensor's differential equation; for a first-order sensor, with time constant $\tau$,</p>
+$$ \tau\frac{db}{dt}+b=b_f \;\Rightarrow\; b(t)=b_f+(b_i-b_f)e^{-t/\tau} $$
+<p><b>First-order step response</b> is a smooth exponential rise which reaches $63.2\%$ of the final value at $t=\tau$ and about $99\%$ at $5\tau$. For a <b>ramp input</b> the output follows the ramp with a constant lag of $\tau$ (error $KR\tau$). <b>Second-order step response</b> depends on damping ratio $\zeta$: for $\zeta<1$ it overshoots and oscillates at $\omega_d=\omega_n\sqrt{1-\zeta^2}$ before settling, for $\zeta=1$ it rises fastest without overshoot, and for $\zeta>1$ it is sluggish. The sketches are shown in section 1.2 above.</p></div>
+
+<div class="qa a" id="a1-3"><div class="qhead"><h3>List/Explain the factors influencing the choice of a transducer for industrial applications.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q2</span><span class="tag">May 2024 · Q1</span><span class="tag">Apr 2025 · Q1 (characteristics)</span></div>
+<p>The main factors are: (1) <b>operating principle and type of output</b> suited to the measured variable; (2) <b>range</b> and <b>sensitivity</b> – the full range of expected values must be covered with an adequate output signal; (3) <b>accuracy, linearity and resolution</b> required by the application; (4) <b>dynamic response</b> – time constant, bandwidth and settling time must match the process speed; (5) <b>environmental conditions</b> – temperature, humidity, vibration, corrosion, hazardous area; (6) <b>loading effect</b> on the measured system; (7) <b>reliability, ruggedness and life</b>; and (8) <b>cost, size, weight and ease of maintenance</b> including calibration needs.</p>
+<p>If the question is on <i>characteristics</i> (Apr 2025), explain any three of the following: <b>sensitivity</b> (output change per unit input change), <b>linearity</b> (closeness of the calibration curve to a straight line), <b>hysteresis</b> (different readings for increasing and decreasing input), <b>resolution</b> (smallest detectable change), <b>accuracy</b> and <b>repeatability</b>, <b>range/span</b>, and <b>response time</b>.</p></div>
+
+<div class="qa a" id="a1-4"><div class="qhead"><h3>Explain the principle of a resistance potentiometer.</h3><span class="marks">3 marks</span></div>
+<div class="tags"><span class="tag">Apr 2025 · Q2</span></div>
+<p>A resistance potentiometer is a passive transducer which converts mechanical displacement (linear or angular) into a proportional voltage by acting as a variable voltage divider. It has a resistive track of total resistance $R_p$ across which an excitation voltage $E$ is applied, and a sliding contact (wiper) connected to the moving object. When the wiper moves a distance $x$ along a track of length $x_t$, the resistance between the wiper and the reference end changes to $R_p\,x/x_t$ and the output voltage is</p>
+$$ e_o = E\,\frac{x}{x_t} $$
+<p>so the output is directly proportional to displacement (when the load resistance is very large compared with $R_p$). Rotational types use a circular track and give $e_o = E\,\theta/\theta_t$.</p></div>
+
+<!-- ===================== PART B ===================== -->
+<h2 id="partB">Part 3 · Part B – Long Answers</h2>
+
+<div class="qa" id="b1-1"><div class="qhead"><h3>Q. Draw and explain the block diagram of a process control loop (with an example industrial process).</h3><span class="marks">7 – 10 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q11(a)</span><span class="tag">Apr 2025 · Q11(a)</span><span class="tag syl">Model paper Q11(a)</span></div>
+<p>A process control loop is a closed (feedback) system that automatically keeps a process variable at its set point. The loop is formed of the following elements, all of which are shown in the block diagram.</p>
+<pre class="fig">
+                         DISTURBANCE (load)
+                                |
+ Set point --&gt;( + )-- e --&gt;[CONTROLLER]--m--&gt;[FINAL CONTROL]--&gt;[   PROCESS   ]--+--&gt; Controlled
+   (r)        ^ -                  (P / PI / PID)       ELEMENT           (plant)   |    variable (c)
+              |                                                                    |
+              '--- b ---[ SIGNAL CONDITIONING ]&lt;---[ SENSOR / TRANSDUCER ]&lt;---------'
+                            (4-20 mA)                (measuring element)
+</pre>
+<p><b>1. Process.</b> The system to be controlled; it receives the manipulated variable and the disturbance and produces the controlled variable $c$. <b>2. Measuring element (sensor + transducer + signal conditioning).</b> The sensor senses the controlled variable and the transducer converts it to an electrical or pneumatic signal $b$; signal conditioning amplifies, linearises and filters it to a standard range such as 4–20 mA. <b>3. Error detector.</b> Compares the measured value with the set point $r$ and produces $e = r - b$. <b>4. Controller.</b> Acts on the error to generate a corrective output $m$ using proportional, integral and derivative action. <b>5. Final control element.</b> The device (control valve, variable-speed drive, heater, damper) that physically alters the manipulated variable on the basis of controller output. <b>6. Disturbance/load.</b> An unwanted change that upsets the process, which the loop must counteract.</p>
+<p><b>Example – liquid level control of a tank.</b> Water flows into a tank at a variable rate (disturbance) and leaves through an outlet. A differential-pressure transmitter (sensor + transducer) measures the level $h$ and sends a 4–20 mA signal to the controller. The controller compares it with the desired level $H$ (set point). If the level is above the set point, the error is negative and the controller commands the control valve in the outlet (or the inlet valve) to open more (or close), which brings the level back to $H$. Similarly, in a steam-heated heat exchanger the outlet temperature is measured by an RTD, and a controller moves the steam valve. In a closed loop the corrective action continues until the error becomes zero (or very small); hence the loop gives <b>negative feedback</b> and stable operation, provided that the loop gains and process lags are suitably chosen.</p></div>
+
+<div class="qa" id="b1-2"><div class="qhead"><h3>Q. With necessary diagrams explain self-regulation, human-aided control and automatic control in a process.</h3><span class="marks">6 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q11(b)</span><span class="tag">Apr 2026 · Q11(a)</span></div>
+<p>Consider a tank into which liquid flows at a rate $Q_i$ and from which it drains through a fixed outlet pipe with flow $Q_o$. The level $h$ is the process variable.</p>
+<h4>(i) Self-regulation</h4>
+<pre class="fig">
+   Qi ---&gt;|        |      Outlet flow  Qo = k * sqrt(h)
+          |  tank  | h
+          |~~~~~~~~|
+          '--------'---&gt; Qo (fixed orifice)
+</pre>
+<p>The outlet flow depends on the head: $Q_o \propto \sqrt{h}$ (or $\propto h$ for a laminar outlet). If $Q_i$ increases, the level rises, which increases $Q_o$ until $Q_o = Q_i$ again, and the level settles at a new constant value. No control element is involved – the process itself tends to a new equilibrium. This natural property is called <b>self-regulation</b>. Its drawback is that the level is determined by $Q_i$; if we want the level fixed at a particular value $H$ regardless of the inlet flow, something more than self-regulation is needed.</p>
+<h4>(ii) Human-aided (manual) control</h4>
+<pre class="fig">
+     Qi ---&gt;|        |  &lt;--- sight tube (operator reads h, compares with set point H)
+            | tank   |
+            |~~~~~~~~|
+            '---[Hand valve]---&gt; Qo
+                    ^ operator opens / closes valve
+</pre>
+<p>A sight tube is fitted and a hand valve is installed in the outlet pipe. A human operator measures the level, compares it with the set point $H$, and adjusts the valve: if the level is higher than $H$ he opens the valve a little to increase the outflow, and if lower he closes it to decrease the outflow. By a succession of small corrections he can bring the level to $H$ and hold it there despite changes of $Q_i$. In this arrangement the human acts as the sensor, comparator, controller and actuator. This is a <b>closed loop with a human in it</b>; it is flexible, but slow, inconsistent and tiring, and not feasible for fast or many loops.</p>
+<h4>(iii) Automatic control</h4>
+<pre class="fig">
+     Qi ---&gt;|        |---[ Level Transmitter LT ]---&gt;[ Controller LC ]&lt;--- set point H
+            | tank   |                                     |
+            '--------'---[ Control valve ]&lt;----------------'
+</pre>
+<p>The human's tasks are replaced by hardware: a level sensor/transmitter measures $h$ and converts it into a standard signal; an automatic controller compares it with the set point and calculates the corrective action; a control valve driven by an actuator changes the outflow. The loop works continuously, quickly and consistently, and the same technique is used in thousands of loops in an industrial plant under the supervision of operators. Automatic control gives improved accuracy, fast response to disturbances, repeatability, reduced labour and safe operation, and it forms the basis of modern PLC/DCS-based automation.</p></div>
+
+<div class="qa" id="b1-3"><div class="qhead"><h3>Q. Explain first-order and second-order time responses of a sensor with relevant sketches and output equations.</h3><span class="marks">4 – 8 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q11(a) (second order, 8)</span><span class="tag">Apr 2025 · Q11(b) (7)</span><span class="tag syl">Model paper Q11(b)</span></div>
+<p>The time response of a sensor describes how the sensor output varies with time when the input is changed suddenly (a step). It depends on the type of sensor, and it can be found from the differential equation.</p>
+<h4>First-order sensor</h4>
+<p>A first-order sensor has one energy storage element, for example the thermal capacity of a thermocouple junction. The relation between the output $b(t)$ and the final value $b_f$ is</p>
+$$ \tau\,\frac{db}{dt} + b = b_f $$
+<p>The solution with $b(0)=b_i$ is</p>
+$$ b(t) = b_f + (b_i - b_f)\,e^{-t/\tau}, \qquad \text{i.e.}\quad \frac{b-b_i}{b_f-b_i}=1-e^{-t/\tau}. $$
+<p>The curve rises exponentially: $63.2\%$ of the change in one time constant, $86.5\%$ in $2\tau$, $95\%$ in $3\tau$, and $99.3\%$ in $5\tau$. A smaller $\tau$ means a faster sensor. The 10–90% rise time is $t_r = 2.2\tau$.</p>
+<pre class="fig">
+ b(t)
+ bf |            ________________
+    |        .-''
+    |      .'    63.2% at t = tau
+ bi |____.'__________________________ t
+</pre>
+<h4>Second-order sensor</h4>
+<p>A second-order sensor (e.g. a mass–spring–damper accelerometer, a bourdon tube pressure gauge, a U-tube manometer) has two energy-storing elements and obeys</p>
+$$ \frac{1}{\omega_n^{2}}\frac{d^{2}b}{dt^{2}} + \frac{2\zeta}{\omega_n}\frac{db}{dt} + b = b_f $$
+<p>where $\omega_n$ is the natural frequency and $\zeta$ the damping ratio. Using the Laplace transform, the characteristic equation is $s^{2}+2\zeta\omega_n s+\omega_n^{2}=0$, with roots $s=-\zeta\omega_n\pm\omega_n\sqrt{\zeta^{2}-1}$. The step response in normalised form $y = (b-b_i)/(b_f-b_i)$ is:</p>
+$$ \begin{aligned}
+\text{Underdamped } (\zeta<1):\quad & y(t) = 1-\frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^{2}}}\sin\!\left(\omega_n\sqrt{1-\zeta^{2}}\,t+\cos^{-1}\zeta\right)\\
+\text{Critically damped } (\zeta=1):\quad & y(t) = 1-(1+\omega_n t)\,e^{-\omega_n t}\\
+\text{Overdamped } (\zeta>1):\quad & y(t) = 1-\frac{e^{-\zeta\omega_n t}}{2\sqrt{\zeta^{2}-1}}\left[\frac{e^{\omega_n\sqrt{\zeta^{2}-1}\,t}}{\zeta-\sqrt{\zeta^{2}-1}}-\frac{e^{-\omega_n\sqrt{\zeta^{2}-1}\,t}}{\zeta+\sqrt{\zeta^{2}-1}}\right]
+\end{aligned} $$
+<p>For an underdamped sensor the characteristics are: <b>peak time</b> $t_p=\pi/\omega_d$; <b>peak overshoot</b> $M_p = e^{-\pi\zeta/\sqrt{1-\zeta^{2}}}$; <b>settling time</b> $t_s\approx 4/(\zeta\omega_n)$. The best compromise for instruments is $\zeta\approx0.7$, which gives rapid response without excessive ringing. If $\zeta$ is small, the output rings at close to $\omega_n$; if $\zeta$ is large, the sensor is slow and approaches a first-order character.</p>
+<pre class="fig">
+ y(t)
+ 1.2|    ,-.
+    |   /   '.  zeta &lt; 1  (overshoot, oscillation)
+ 1.0|--/-----'-'---------------   zeta = 1 (critical)
+    | /   ___.---------------    zeta &gt; 1 (overdamped)
+    |/_.-'
+    '--------------------------- t
+</pre></div>
+
+<div class="qa" id="b1-4"><div class="qhead"><h3>Q. Explain the criteria for the selection of a transducer for an industrial application. Mention applications of transducers.</h3><span class="marks">7 – 8 marks</span></div>
+<div class="tags"><span class="tag">Apr 2025 · Q12(a)</span><span class="tag">Apr 2026 · Q11(b)</span><span class="tag syl">Model paper Q1</span></div>
+<p>Selecting the right transducer is critical because the performance of an entire measuring or control system is limited by its sensing element. The following criteria are considered, in roughly the order of importance:</p>
+<ol>
+<li><b>Operating principle and measured variable:</b> choose a principle matched to the quantity – resistive for displacement, thermocouple/RTD for temperature, piezoelectric for dynamic force, capacitive for pressure and so on.</li>
+<li><b>Range and sensitivity:</b> the transducer's range should cover the maximum and minimum values to be measured with a safety margin for overload, and should deliver sufficiently large output per unit input without being sensitive to other variables (cross-sensitivity).</li>
+<li><b>Accuracy, linearity, resolution and repeatability:</b> the error budget of the application decides the class of transducer required; non-linearity may need linearisation circuits.</li>
+<li><b>Dynamic characteristics:</b> the response time, bandwidth and damping must match the rate of change of the quantity so that dynamic error is small.</li>
+<li><b>Loading effect:</b> the transducer must not extract significant energy from, or alter, the system being measured (high input impedance, low mass).</li>
+<li><b>Environmental conditions:</b> operating temperature, humidity, shock and vibration, corrosive chemicals, dust, explosion-proof requirement, EMI/RFI and ingress protection.</li>
+<li><b>Electrical considerations:</b> type of output (voltage, current, frequency, digital), output impedance, excitation power and signal-conditioning needs, cable length.</li>
+<li><b>Reliability, life, maintainability and calibration interval.</b></li>
+<li><b>Economic factors:</b> initial cost, installation cost, size and weight, and spares availability.</li>
+</ol>
+<p><b>Applications of transducers.</b> (i) A strain-gauge load cell for weighing of materials in batching plants; (ii) a thermocouple or RTD for furnace and boiler temperature; (iii) an LVDT for displacement/position of valve stem or roll gap in a rolling mill; (iv) a capacitive/piezoresistive pressure transducer for pressure of steam and hydraulic lines; (v) an electromagnetic or turbine flow meter for liquid flow; (vi) a tachogenerator or VR tachometer for motor speed; (vii) a piezoelectric accelerometer for machine vibration monitoring; (viii) ultrasonic level sensors for tank level.</p></div>
+
+<div class="qa" id="b1-5"><div class="qhead"><h3>Q. Illustrate / explain capacitive differential pressure measurement.</h3><span class="marks">7 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q12(a)</span><span class="tag">May 2024 · Q11(b)</span><span class="tag">Apr 2026 · Q12(a)</span><span class="tag syl">Model paper Q12(b)</span></div>
+<p>The capacitive differential pressure transducer measures the <i>difference</i> between two pressures, $\Delta P = P_1 - P_2$, using a flexible metallic <b>sensing diaphragm</b> mounted between two fixed electrodes. The diaphragm and each fixed plate form capacitors $C_1$ and $C_2$.</p>
+<pre class="fig">
+      P1 (high) ---&gt;   |  isolating   | fixed plate P1
+                       |  diaphragm   |==== C1 ====
+                       |   (oil fill) |  sensing diaphragm  (movable, centre plate)
+      P2 (low)  ---&gt;   |              |==== C2 ====
+                       |              | fixed plate P2
+        AC supply E applied across P1 and P2 : output = E1 - E2 -&gt; demodulator -&gt; 4-20 mA
+</pre>
+<p><b>Working.</b> When both pressures are equal, the diaphragm stays midway, so $C_1=C_2$. The AC supply $E$ across the outer plates divides equally: $E_1 = E\,\dfrac{C_2}{C_1+C_2} = \dfrac{E}{2}$, and $E_2 = E/2$; hence $E_1 - E_2=0$. When $P_1 > P_2$ the diaphragm moves by $x$ towards plate $P_2$, so that</p>
+$$ C_1=\frac{\varepsilon A}{d_0-x},\qquad C_2=\frac{\varepsilon A}{d_0+x}. $$
+<p>The difference of voltages across the two capacitors becomes</p>
+$$ E_o = E_1-E_2 = E\,\frac{C_2-C_1}{C_2+C_1} = -E\,\frac{x}{d_0}. $$
+<p>Since the diaphragm deflection is proportional to the pressure difference, $x = (A_d/k)\,\Delta P$, the output $|E_o| = \dfrac{E A_d}{k d_0}\,\Delta P$ is linear in $\Delta P$. The output is an AC signal whose phase (relative to the supply) tells which side is higher; it is rectified, filtered and amplified by the transmitter electronics to give a standard 4–20 mA output. Taking the ratio of capacitances cancels the dependence on $\varepsilon$ and $A$, so temperature changes have little effect. <b>Used for:</b> differential pressure across an orifice plate (flow), hydrostatic head (level in closed tanks) and filter drop. <b>Advantages:</b> high accuracy and sensitivity, excellent linearity, very small displacement, good overload protection; <b>disadvantages:</b> stray-capacitance sensitivity and electronic complexity.</p></div>
+
+<div class="qa" id="b1-6"><div class="qhead"><h3>Q. Explain displacement measurement using a resistance potentiometer.</h3><span class="marks">7 marks</span></div>
+<div class="tags"><span class="tag">Jun 2023 · Q12(b)</span><span class="tag">Apr 2026 · Q12(b)</span></div>
+<p>A resistive transducer relies on the relationship $R = \rho\,l/A$; any of the quantities $\rho$, $l$ or $A$ can be varied to produce a resistance change in response to a measured variable. In the resistance potentiometer the <b>length</b> is changed by a sliding contact. It is used for the measurement of linear and angular displacement and, through an elastic element, of force and pressure.</p>
+<p><b>Construction.</b> The pot has a resistive element in the form of a straight bar or a circular (or helical) track with total resistance $R_p$ and a sliding contact (<b>wiper</b>) which is linked to the moving member whose displacement is to be measured. The element may be wire-wound, or made of cermet, hot-moulded carbon, carbon film or thin metal film, and it may be excited by DC or AC. As external excitation is needed, the pot is a <b>passive</b> transducer.</p>
+<pre class="fig">
+        E (excitation) o----+------------+
+                            |            |
+                         ===+=== resistive element Rp ===
+                            |     ^ wiper (moves with displacement x)
+                            |     |-----------o eo -----&gt; to measuring circuit (RL)
+        0 V o---------------'
+</pre>
+<p><b>Operation.</b> If the wiper is displaced $x$ from the zero end of a track of length $x_t$, then with an infinite load resistance</p>
+$$ e_o = E\,\frac{R_x}{R_p} = E\,\frac{x}{x_t}, \qquad \text{sensitivity } S_x = \frac{E}{x_t}. $$
+<p>For angular displacement $e_o = E\,\theta/\theta_t$. With a finite load resistance $R_L$, the relation becomes non-linear:</p>
+$$ \frac{e_o}{E} = \frac{r}{1+\dfrac{R_p}{R_L}\,r(1-r)},\qquad r=\frac{x}{x_t}, $$
+<p>and the maximum loading error is about $\dfrac{4}{27}\,\dfrac{R_p}{R_L}$ (relative to full scale) near $r\approx 2/3$ for small $R_p/R_L$. The error is made small by keeping $R_L\gg R_p$. <b>Resolution</b> of a wire-wound pot is $100/N\ \%$ where $N$ is the number of turns.</p>
+<p><b>Merits:</b> low cost, simple, large output (no amplifier), suited to large strokes. <b>Demerits:</b> wear and friction, limited speed of response, noise, loading error and finite resolution.</p></div>
+
+<div class="qa" id="b1-7"><div class="qhead"><h3>Q. Explain the principle and operation of the variable reluctance tachometer.</h3><span class="marks">7 marks</span></div>
+<div class="tags"><span class="tag">Apr 2025 · Q12(b)</span><span class="tag syl">Model paper Q12(a)</span></div>
+<p>The variable reluctance tachometer is a non-contact device for measuring the rotational speed of a shaft. It operates on the principle of <b>electromagnetic induction with a magnetic circuit of varying reluctance</b>.</p>
+<p><b>Construction.</b> It has two parts: (i) a <b>toothed wheel</b> (sprocket) of soft iron or other ferromagnetic material having $N_t$ teeth, mounted on the shaft whose speed is to be measured, and (ii) a <b>sensing head</b> consisting of a coil of $N$ turns wound on a permanent magnet pole piece, kept close to the teeth with a small air gap.</p>
+<pre class="fig">
+         pick-up coil (N turns)
+            ___|___     S N  permanent magnet
+           |  ___  |
+        ===|=|   |=|==  &lt;- small air gap
+      _/\_/\_/\_/\_/\_  toothed ferromagnetic wheel (Nt teeth) -- on rotating shaft
+        output: pulses, frequency f = Nt.n/60  --&gt; Schmitt trigger --&gt; counter / display
+</pre>
+<p><b>Principle and operation.</b> As the wheel rotates, a tooth and then a gap pass in front of the pole piece. When a tooth is aligned with the pole, the air gap is minimum, the reluctance of the magnetic path is minimum and the flux linking the coil is maximum; when a gap faces the pole, the reluctance is maximum and the flux is minimum. The flux through the coil thus changes periodically with the rotation. According to Faraday's law an emf is induced:</p>
+$$ e = -N\frac{d\phi}{dt} = -N\,\frac{d\phi}{d\theta}\cdot\frac{d\theta}{dt} = -N\,\frac{d\phi}{d\theta}\,\omega $$
+<p>so the amplitude of the voltage is proportional to the angular speed $\omega$, and the frequency of the pulses is fixed by tooth rate:</p>
+$$ f = \frac{N_t\,n}{60}\ \text{Hz},\qquad n=\frac{60\,f}{N_t}\ \text{rpm}. $$
+<p>Example: a 60-tooth wheel running at 1500 rpm produces $f = 60\times1500/60 = 1500$ Hz. The signal is squared by a Schmitt trigger and fed to a frequency counter (gate time chosen for the required resolution), or to a frequency-to-voltage converter, giving a digital display or analogue signal. Because the speed information is contained in the frequency, errors from variation in air gap or amplitude do not matter. <b>Advantages:</b> non-contact, rugged, no external supply, digital output, long life. <b>Limitations:</b> output falls to zero at low speed so it cannot measure very low speed or standstill; teeth must be ferromagnetic; sensitivity to air-gap and magnetic noise. <b>Applications:</b> engine speed, turbine speed, ABS wheel-speed sensors, machine tool spindles.</p></div>
+
+<div class="qa" id="b1-8"><div class="qhead"><h3>Q. Explain analog and digital phase measurement techniques with block diagram.</h3><span class="marks">7 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q12(a)</span></div>
+<p>Phase measurement gives the angle $\phi$ by which one sinusoidal signal leads or lags another of the same frequency. The techniques are based on converting the phase to a time interval, and then to a voltage (analog) or to a count (digital).</p>
+<h4>Analog method</h4>
+<pre class="fig">
+  v1 --[Zero crossing detector]--+
+                                 +--&gt;[Flip-flop / XOR]--&gt; pulses --&gt;[Low-pass filter / DC meter]--&gt; V_avg
+  v2 --[Zero crossing detector]--+            pulse width = delta t = phi/(360 f)
+</pre>
+<p>Each signal is applied to a <b>zero-crossing detector</b> (a comparator or Schmitt trigger) which produces a square wave. The positive-going edges of the two square waves set and reset a flip-flop. The flip-flop output is high for a time $\Delta t$ in each cycle, where $\Delta t = \dfrac{\phi}{360^\circ}T$. A low-pass filter or a moving-coil meter averages the pulses to give</p>
+$$ V_{avg} = V_{H}\,\frac{\Delta t}{T} = V_H\,\frac{\phi}{360^\circ}\ \Rightarrow\ \phi = 360^\circ\,\frac{V_{avg}}{V_H}. $$
+<p>A calibrated analog meter then reads $\phi$ directly. It is simple and low-cost, but its accuracy depends on the stability of the pulse amplitude $V_H$ and filter linearity, and it is limited for small phase angles.</p>
+<h4>Digital method</h4>
+<pre class="fig">
+  v1 --[ZCD]--+                          +--------------+
+              +--&gt;[Flip-flop]--&gt; gate --&gt;| AND          |--&gt; [Counter] --&gt; Display (phi)
+  v2 --[ZCD]--+                          | clock fc  ---+
+</pre>
+<p>The same time interval $\Delta t$ generated by the flip-flop opens an AND gate to pass pulses from a high-frequency clock of frequency $f_c$ to a counter. The count per cycle is $N_\phi = f_c\,\Delta t$. A second count $N_T = f_c T$ is obtained for the full period (or the clock is selected as $f_c = 360\,f$ so that each count equals one degree). Then</p>
+$$ \phi = 360^\circ\,\frac{N_\phi}{N_T}. $$
+<p>The result is displayed digitally. Averaging over many cycles reduces random error. Resolution $= 360^\circ f/f_c$, so a higher clock frequency gives a better resolution. The digital method has high accuracy, a direct numeric output, and is independent of amplitude fluctuations, but requires more circuitry and cost.</p></div>
+
+<div class="qa" id="b1-9"><div class="qhead"><h3>Q. What is a hot-wire anemometer? Explain the principle and working of the constant-current type. Mention one advantage.</h3><span class="marks">7 marks</span></div>
+<div class="tags"><span class="tag">May 2024 · Q12(b)</span><span class="tag syl">Model paper Part A Q2 (modes)</span></div>
+<p>A <b>hot-wire anemometer</b> is a thermal flow-velocity transducer in which a very thin electrically-heated wire (platinum, tungsten) placed in the flowing gas is cooled by the stream; the amount of cooling is a measure of the velocity. It is used for gas flow, air velocity and turbulence.</p>
+<p><b>Principle.</b> Heat generated in the wire by the current ($I^2R_w$) is lost to the fluid by forced convection. At steady state</p>
+$$ I^2R_w = (T_w-T_f)\,(a+b\sqrt v)\qquad\text{(King's law).} $$
+<p>Also the wire's resistance varies with temperature as $R_w = R_0[1+\alpha(T_w - T_0)]$, where $\alpha$ is the temperature coefficient. An increase of velocity $v$ lowers $T_w$, and thus lowers $R_w$.</p>
+<p><b>Constant-current type.</b> The wire is one arm of a Wheatstone bridge, supplied with a fixed current $I$ (large series resistance). With no flow the bridge is balanced at some reference wire temperature. When the fluid velocity increases, the wire cools, its resistance decreases, the bridge goes out of balance and the output voltage $\Delta E$ is calibrated against velocity. Eliminating $T_w$ between the two relations gives the wire resistance as a function of velocity,</p>
+$$ R_w = R_0\left[1+\alpha\,(T_f-T_0)\right] + \frac{\alpha R_0\, I^{2}R_w}{a+b\sqrt{v}} , $$
+<p>so $R_w$ falls non-linearly with $\sqrt v$ and the bridge output therefore needs a linearising calibration. <b>Advantage:</b> simple circuitry and low noise, good for low-frequency measurements. (Limitations: slow response because of thermal inertia of the wire, and the sensor can burn out at low flow.) In the <b>constant-temperature</b> mode the bridge current is varied by feedback to keep $R_w$ constant, and gives a faster response and burn-out protection.</p></div>
+
+</main></div>
+</body>
+</html>

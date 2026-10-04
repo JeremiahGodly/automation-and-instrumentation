@@ -1,0 +1,55 @@
+:root{--bg:#f7f8fb;--card:#fff;--ink:#1d2433;--muted:#5b6578;--accent:#2457d6;--accent2:#0f8a6a;--line:#e1e5ee;--code:#0f172a;--warn:#fff6e0}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;font-size:17px}
+.layout{display:flex;min-height:100vh}
+nav.side{width:270px;flex:0 0 270px;background:#10192e;color:#cfd8ee;padding:22px 16px;position:sticky;top:0;height:100vh;overflow:auto}
+nav.side h1{font-size:16px;margin:0 0 4px;color:#fff;line-height:1.3}
+nav.side .sub{font-size:12px;color:#8ea0c9;margin-bottom:18px}
+nav.side a{display:block;color:#cfd8ee;text-decoration:none;padding:8px 10px;border-radius:8px;font-size:14px;margin:2px 0}
+nav.side a:hover{background:#1b2a4d}
+nav.side a.active{background:var(--accent);color:#fff}
+nav.side .mini{font-size:12px;color:#8ea0c9;margin:14px 10px 4px;text-transform:uppercase;letter-spacing:.06em}
+main{flex:1;max-width:960px;padding:34px 40px 80px;margin:0 auto;min-width:0}
+h1.title{font-size:30px;margin:0 0 6px}
+.lead{color:var(--muted);margin-bottom:24px}
+h2{font-size:24px;margin:44px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+h3{font-size:19px;margin:0 0 8px}
+h4{font-size:16px;margin:18px 0 4px;color:var(--accent)}
+p{margin:0 0 14px;text-align:justify}
+ul,ol{margin:0 0 14px 22px;padding:0}
+li{margin-bottom:6px}
+.topic,.qa{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin:18px 0;box-shadow:0 1px 3px rgba(16,25,46,.05)}
+.qa{border-left:5px solid var(--accent)}
+.qa.a{border-left-color:var(--accent2)}
+.qa .qhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.marks{background:#e8f0ff;color:var(--accent);font-weight:600;font-size:13px;border-radius:20px;padding:2px 12px;white-space:nowrap}
+.tags{margin:2px 0 14px}
+.tag{display:inline-block;background:#eef7f3;color:#0b6b52;font-size:12px;border-radius:6px;padding:1px 8px;margin:2px 4px 2px 0;font-weight:600}
+.tag.syl{background:#fff1d6;color:#8a5a00}
+.note{background:var(--warn);border:1px solid #f0dca0;border-radius:10px;padding:10px 16px;margin:14px 0;font-size:15px}
+pre.fig{background:var(--code);color:#d7e3ff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.35;padding:16px 18px;border-radius:10px;overflow:auto;margin:14px 0;text-align:left}
+figcaption,.cap{font-size:13px;color:var(--muted);text-align:center;margin-top:-6px;margin-bottom:14px}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:15px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:#eef2fb}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;display:block;transition:.15s}
+.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 6px 18px rgba(36,87,214,.12)}
+.card b{display:block;color:var(--accent);margin-bottom:4px}
+.card span{font-size:14px;color:var(--muted)}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 22px;margin:16px 0}
+.toc a{color:var(--accent);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.toc ul{columns:2;column-gap:30px}
+.search{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--line);font-size:15px;margin:6px 0 14px}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+#menu{display:none}
+@media(max-width:900px){
+ nav.side{position:fixed;left:-290px;z-index:10;transition:.2s;width:270px}
+ nav.side.open{left:0}
+ #menu{display:block;position:fixed;top:10px;right:12px;z-index:11;background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:15px}
+ main{padding:60px 16px 60px}
+ .toc ul{columns:1}
+}
+@media print{nav.side,#menu,.search{display:none}main{max-width:none}}
